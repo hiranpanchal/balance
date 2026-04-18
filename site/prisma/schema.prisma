@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Auth.js v5 required models ───────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Domain models ────────────────────────────────────────────────────────────
+
+model Booking {
+  id        String        @id @default(cuid())
+  ref       String        @unique
+  firstName String
+  lastName  String
+  email     String
+  phone     String
+  service   String
+  duration  Int
+  date      String
+  time      String
+  price     Int
+  status    BookingStatus @default(PENDING)
+  firstTime Boolean       @default(false)
+  notes     String        @default("")
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+model Service {
+  id           String            @id
+  name         String
+  tagline      String
+  lead         String            @db.Text
+  image        String            @default("")
+  whatToExpect Json              @default("[]")
+  goodFor      Json              @default("[]")
+  displayOrder Int               @default(0)
+  durations    ServiceDuration[]
+}
+
+model ServiceDuration {
+  id        String  @id @default(cuid())
+  serviceId String
+  mins      Int
+  price     Int
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([serviceId, mins])
+}
+
+model JournalPost {
+  slug        String   @id
+  title       String
+  excerpt     String   @db.Text
+  body        String   @db.Text
+  tag         String   @default("")
+  readingTime Int      @default(3)
+  image       String   @default("")
+  published   Boolean  @default(false)
+  publishedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model BlockedDate {
+  id        String   @id @default(cuid())
+  date      String   @unique
+  reason    String   @default("")
+  isFullDay Boolean  @default(true)
+  startTime String?
+  endTime   String?
+  createdAt DateTime @default(now())
+}
+
+model Content {
+  key       String   @id
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+}
+
+model Image {
+  id        String   @id @default(cuid())
+  url       String   @unique
+  alt       String   @default("")
+  slot      String   @default("")
+  filename  String
+  size      Int
+  createdAt DateTime @default(now())
+}
