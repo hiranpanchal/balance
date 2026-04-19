@@ -15,9 +15,11 @@ import {
   Users,
   FileText,
   Gift,
+  LayoutDashboard,
 } from "lucide-react";
 
 const navItems = [
+  { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/clients", label: "Clients", icon: Users },
   { href: "/admin/bookings", label: "Bookings", icon: CalendarDays },
   { href: "/admin/calendar", label: "Calendar", icon: Calendar },
