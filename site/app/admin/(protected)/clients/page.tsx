@@ -35,6 +35,12 @@ export default async function ClientsPage() {
           <h1 className="font-serif text-[28px] text-[#3E4F56] font-normal">Clients</h1>
           <p className="text-[13px] text-[#A09687] mt-1">{clients.length} total</p>
         </div>
+        <Link
+          href="/admin/clients/new"
+          className="px-5 py-2.5 bg-[#3E4F56] text-white text-[12px] tracking-[0.1em] uppercase rounded hover:opacity-90"
+        >
+          + New client
+        </Link>
       </div>
 
       {/* Summary cards */}

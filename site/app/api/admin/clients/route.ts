@@ -1,7 +1,16 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+
+const CreateSchema = z.object({
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  email: z.string().email(),
+  phone: z.string().optional(),
+  notes: z.string().optional(),
+});
 
 export async function GET() {
   const session = await auth();
@@ -26,4 +35,24 @@ export async function GET() {
   }));
 
   return NextResponse.json(result);
+}
+
+export async function POST(request: Request) {
+  const session = await auth();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const body = await request.json();
+  const data = CreateSchema.parse(body);
+
+  const client = await db.client.create({
+    data: {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      phone: data.phone ?? "",
+      notes: data.notes ?? "",
+    },
+  });
+
+  return NextResponse.json(client, { status: 201 });
 }
