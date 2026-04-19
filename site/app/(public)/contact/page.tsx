@@ -83,10 +83,8 @@ export default async function ContactPage() {
             <div>
               <Eyebrow>Travel</Eyebrow>
               <p className="mt-3 text-[14px] leading-[24px] text-teal/80">
-                Two minutes from the harbour. Nearest rail station: Bristol
-                Temple Meads, fifteen minutes on foot. Street parking on Linen
-                Lane is metered; the harbourside car park is a three-minute
-                walk.
+                Street parking is available nearby. The map above will give you
+                full directions from your location.
               </p>
             </div>
           </aside>
@@ -95,26 +93,14 @@ export default async function ContactPage() {
 
       <section className="px-6 md:px-12 pb-24">
         <div className="max-w-[1200px] mx-auto">
-          <div
-            role="img"
-            aria-label="Map showing 14 Linen Lane, Bristol"
-            className="w-full h-[360px] rounded-lg overflow-hidden bg-cream-light relative flex items-center justify-center"
-            style={{
-              background:
-                "repeating-linear-gradient(135deg, var(--cream-light) 0 22px, rgba(62,79,86,0.06) 22px 23px)",
-            }}
-          >
-            <div className="text-center">
-              <Eyebrow>Map</Eyebrow>
-              <p className="mt-3 font-display text-[20px] text-teal">
-                14 Linen Lane, Bristol BS1 4AA
-              </p>
-              <p className="mt-2 text-[12px] tracking-[0.18em] uppercase text-stone">
-                {/* TODO: embed a real map provider (Mapbox / Google Maps) */}
-                Map placeholder
-              </p>
-            </div>
-          </div>
+          <iframe
+            title={`Map — ${studio.addressLines.join(", ")}`}
+            src={`https://maps.google.com/maps?q=${encodeURIComponent(studio.addressLines.join(", "))}&output=embed&z=15`}
+            className="w-full h-[400px] rounded-lg border-0"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            allowFullScreen
+          />
         </div>
       </section>
     </>
