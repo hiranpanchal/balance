@@ -143,3 +143,14 @@ model Image {
   size      Int
   createdAt DateTime @default(now())
 }
+
+model Client {
+  id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String   @unique
+  phone     String   @default("")
+  notes     String   @default("") @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

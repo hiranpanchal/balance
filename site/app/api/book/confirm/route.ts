@@ -49,6 +49,13 @@ export async function POST(request: Request) {
       },
     });
 
+    // Upsert client record
+    await db.client.upsert({
+      where: { email: data.email },
+      update: { firstName: data.firstName, lastName: data.lastName, phone: data.phone },
+      create: { firstName: data.firstName, lastName: data.lastName, email: data.email, phone: data.phone },
+    });
+
     // Send confirmation email (non-blocking — don't fail booking if email fails)
     try {
       const serviceName =

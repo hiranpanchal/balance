@@ -12,9 +12,11 @@ import {
   BookOpen,
   LogOut,
   Settings,
+  Users,
 } from "lucide-react";
 
 const navItems = [
+  { href: "/admin/clients", label: "Clients", icon: Users },
   { href: "/admin/bookings", label: "Bookings", icon: CalendarDays },
   { href: "/admin/services", label: "Services", icon: Layers },
   { href: "/admin/availability", label: "Availability", icon: Calendar },
