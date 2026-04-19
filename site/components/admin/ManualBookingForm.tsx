@@ -21,7 +21,7 @@ const times = [
 
 export function ManualBookingForm({ client }: Props) {
   const router = useRouter();
-  const [serviceId, setServiceId] = useState(services[0].id);
+  const [serviceId, setServiceId] = useState<string>(services[0].id);
   const [duration, setDuration] = useState(services[0].durations[0].mins);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("10:00");
