@@ -1,11 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Eyebrow } from "@/components/site/Eyebrow";
 import { Button } from "@/components/site/Button";
 import { BookingSummary } from "./BookingSummary";
-import { slotsFor } from "@/lib/data";
 import type { BookingSelection, Service } from "@/lib/types";
 
 function toISODate(d: Date) {
@@ -46,13 +45,23 @@ export function StepSchedule({
   });
 
   const selectedDate = selection.date || "";
+  const duration = selection.duration ?? 60;
 
-  const slots = useMemo(() => {
-    if (!selectedDate) return [];
-    return slotsFor(selectedDate).filter((t) =>
-      meetsCutoff(selectedDate, t),
-    );
-  }, [selectedDate]);
+  const [slots, setSlots] = useState<string[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+
+  useEffect(() => {
+    if (!selectedDate) { setSlots([]); return; }
+    setLoadingSlots(true);
+    fetch(`/api/book/slots?date=${selectedDate}&duration=${duration}`)
+      .then((r) => r.json())
+      .then((data) => {
+        const filtered = (data.slots as string[]).filter((t) => meetsCutoff(selectedDate, t));
+        setSlots(filtered);
+      })
+      .catch(() => setSlots([]))
+      .finally(() => setLoadingSlots(false));
+  }, [selectedDate, duration]);
 
   const canContinue = Boolean(selection.date && selection.time);
 
@@ -201,7 +210,9 @@ export function StepSchedule({
               </div>
             </div>
             {selectedDate ? (
-              slots.length === 0 ? (
+              loadingSlots ? (
+                <p className="text-[14px] text-teal/60">Checking availability…</p>
+              ) : slots.length === 0 ? (
                 <p className="text-[14px] text-teal/75">
                   No slots remaining for that day. Please choose another.
                 </p>
