@@ -22,17 +22,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Captcha verification failed. Please try again." }, { status: 422 });
     }
 
+    const { db } = await import("@/lib/db");
+    await db.message.create({
+      data: {
+        name: data.name,
+        email: data.email,
+        phone: data.phone ?? "",
+        body: data.message,
+      },
+    });
+
     const adminEmail = process.env.ADMIN_EMAIL;
     if (adminEmail) {
       const { Resend } = await import("resend");
       const resend = new Resend(process.env.RESEND_API_KEY);
       const from = process.env.EMAIL_FROM ?? "Balance & Wellness <hello@balanceandwellness.com>";
+      const siteOrigin = process.env.NEXT_PUBLIC_SITE_URL ?? "https://balanceandwellness.vercel.app";
       await resend.emails.send({
         from,
         to: adminEmail,
         replyTo: data.email,
-        subject: `Contact message from ${data.name}`,
-        text: `Name: ${data.name}\nEmail: ${data.email}${data.phone ? `\nPhone: ${data.phone}` : ""}\n\n${data.message}`,
+        subject: `New message from ${data.name}`,
+        text: `${data.name} sent a message via the contact form.\n\n${data.message}\n\nReply in the admin: ${siteOrigin}/admin/messages`,
       });
     }
 

@@ -86,6 +86,26 @@ enum BookingStatus {
   NO_SHOW
 }
 
+model Message {
+  id        String         @id @default(cuid())
+  name      String
+  email     String
+  phone     String         @default("")
+  body      String         @db.Text
+  read      Boolean        @default(false)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  replies   MessageReply[]
+}
+
+model MessageReply {
+  id        String   @id @default(cuid())
+  messageId String
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  body      String   @db.Text
+  sentAt    DateTime @default(now())
+}
+
 model WaitlistEntry {
   id          String    @id @default(cuid())
   firstName   String

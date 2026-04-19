@@ -18,7 +18,7 @@ export default async function DashboardPage() {
   const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
   const twelveMonthsAgoStr = twelveMonthsAgo.toISOString().split("T")[0];
 
-  const [allBookings, services, upcomingCount, pendingCount, clientCount] = await Promise.all([
+  const [allBookings, services, upcomingCount, pendingCount, clientCount, unreadMessages] = await Promise.all([
     db.booking.findMany({
       where: { status: { in: ["CONFIRMED", "COMPLETED"] }, date: { gte: twelveMonthsAgoStr } },
       select: { date: true, price: true, service: true },
@@ -28,6 +28,12 @@ export default async function DashboardPage() {
     db.booking.count({ where: { status: "CONFIRMED", date: { gte: todayStr } } }),
     db.booking.count({ where: { status: "PENDING" } }),
     db.client.count(),
+    db.message.findMany({
+      where: { read: false },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: { id: true, name: true, email: true, body: true, createdAt: true },
+    }),
   ]);
 
   // ── Monthly revenue for chart (last 12 months) ────────────────────────────
@@ -140,6 +146,45 @@ export default async function DashboardPage() {
         <StatCard label="Pending payment" value={String(pendingCount)} small />
         <StatCard label="Total clients" value={String(clientCount)} small />
       </div>
+
+      {/* Unread messages */}
+      {unreadMessages.length > 0 && (
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-[11px] tracking-[0.1em] uppercase text-[#A09687]">
+              Unread messages
+              <span className="ml-2 bg-[#3E4F56] text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                {unreadMessages.length}
+              </span>
+            </h2>
+            <a href="/admin/messages" className="text-[11px] tracking-[0.1em] uppercase text-[#B28B5D] hover:underline">
+              View all →
+            </a>
+          </div>
+          <div className="divide-y divide-[#EAE2D2]">
+            {unreadMessages.map((m) => (
+              <a
+                key={m.id}
+                href={`/admin/messages?id=${m.id}`}
+                className="flex items-start gap-4 py-3 hover:bg-[#FAFAF8] -mx-6 px-6 transition-colors"
+              >
+                <div className="w-7 h-7 rounded-full bg-[#EAE2D2] flex items-center justify-center shrink-0 text-[11px] text-[#3E4F56] font-medium mt-0.5">
+                  {m.name[0].toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[13px] font-semibold text-[#3E4F56] truncate">{m.name}</span>
+                    <span className="text-[11px] text-[#A09687] shrink-0">
+                      {new Date(m.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                    </span>
+                  </div>
+                  <p className="text-[12px] text-[#A09687] truncate mt-0.5">{m.body.slice(0, 100)}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Monthly revenue chart */}
       <div className="bg-white rounded-lg shadow-sm p-6">

@@ -17,6 +17,7 @@ import {
   Gift,
   LayoutDashboard,
   Clock,
+  Mail,
 } from "lucide-react";
 
 const navItems = [
@@ -24,6 +25,7 @@ const navItems = [
   { href: "/admin/clients", label: "Clients", icon: Users },
   { href: "/admin/bookings", label: "Bookings", icon: CalendarDays },
   { href: "/admin/calendar", label: "Calendar", icon: Calendar },
+  { href: "/admin/messages", label: "Messages", icon: Mail },
   { href: "/admin/services", label: "Services", icon: Layers },
   { href: "/admin/availability", label: "Availability", icon: Calendar },
   { href: "/admin/vouchers", label: "Vouchers", icon: Gift },
