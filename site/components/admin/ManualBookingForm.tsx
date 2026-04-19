@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { services } from "@/lib/data";
+import { SelectField } from "@/components/admin/SelectField";
 
 interface Props {
   client: {
@@ -18,6 +19,11 @@ const times = [
   "12:00", "12:30", "13:00", "13:30", "14:00", "14:30",
   "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30",
 ];
+
+const inputClass =
+  "w-full border border-[#3E4F56]/15 rounded-md px-3 py-2.5 text-[13px] text-[#3E4F56] bg-white focus:outline-none focus:border-[#B28B5D] focus:ring-1 focus:ring-[#B28B5D]/30 transition-colors hover:border-[#3E4F56]/30";
+const labelClass =
+  "block text-[11px] tracking-[0.12em] uppercase text-[#A09687] mb-1.5";
 
 export function ManualBookingForm({ client }: Props) {
   const router = useRouter();
@@ -40,7 +46,8 @@ export function ManualBookingForm({ client }: Props) {
     setPrice(svc.durations[0].price);
   }
 
-  function handleDurationChange(mins: number) {
+  function handleDurationChange(val: string) {
+    const mins = Number(val);
     setDuration(mins);
     const d = selectedService.durations.find((d) => d.mins === mins);
     if (d) setPrice(d.price);
@@ -83,13 +90,9 @@ export function ManualBookingForm({ client }: Props) {
     setError("");
   }
 
-  const inputClass =
-    "w-full border border-[#3E4F56]/20 rounded px-3 py-2 text-[13px] text-[#3E4F56] bg-[#F5F0E6] focus:outline-none focus:border-[#B28B5D]";
-  const labelClass = "block text-[11px] tracking-[0.1em] uppercase text-[#A09687] mb-1.5";
-
   return (
     <div className="bg-white rounded-lg shadow-sm p-6">
-      <h2 className="text-[11px] tracking-[0.1em] uppercase text-[#A09687] mb-5">
+      <h2 className="text-[11px] tracking-[0.12em] uppercase text-[#A09687] mb-5">
         Add booking
       </h2>
 
@@ -100,32 +103,20 @@ export function ManualBookingForm({ client }: Props) {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className={labelClass}>Treatment</label>
-          <select
-            value={serviceId}
-            onChange={(e) => handleServiceChange(e.target.value)}
-            className={inputClass}
-          >
-            {services.map((s) => (
-              <option key={s.id} value={s.id}>{s.name}</option>
-            ))}
-          </select>
-        </div>
+        <SelectField
+          label="Treatment"
+          value={serviceId}
+          onChange={handleServiceChange}
+          options={services.map((s) => ({ value: s.id, label: s.name }))}
+        />
 
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className={labelClass}>Duration</label>
-            <select
-              value={duration}
-              onChange={(e) => handleDurationChange(Number(e.target.value))}
-              className={inputClass}
-            >
-              {selectedService.durations.map((d) => (
-                <option key={d.mins} value={d.mins}>{d.mins} min</option>
-              ))}
-            </select>
-          </div>
+          <SelectField
+            label="Duration"
+            value={duration}
+            onChange={handleDurationChange}
+            options={selectedService.durations.map((d) => ({ value: d.mins, label: `${d.mins} min` }))}
+          />
           <div>
             <label className={labelClass}>Price (£)</label>
             <input
@@ -148,33 +139,25 @@ export function ManualBookingForm({ client }: Props) {
               className={inputClass}
             />
           </div>
-          <div>
-            <label className={labelClass}>Time</label>
-            <select
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              className={inputClass}
-            >
-              {times.map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
-          </div>
+          <SelectField
+            label="Time"
+            value={time}
+            onChange={setTime}
+            options={times.map((t) => ({ value: t, label: t }))}
+          />
         </div>
 
-        <div>
-          <label className={labelClass}>Status</label>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className={inputClass}
-          >
-            <option value="CONFIRMED">Confirmed</option>
-            <option value="PENDING">Pending</option>
-            <option value="COMPLETED">Completed</option>
-            <option value="CANCELLED">Cancelled</option>
-          </select>
-        </div>
+        <SelectField
+          label="Status"
+          value={status}
+          onChange={setStatus}
+          options={[
+            { value: "CONFIRMED", label: "Confirmed" },
+            { value: "PENDING", label: "Pending" },
+            { value: "COMPLETED", label: "Completed" },
+            { value: "CANCELLED", label: "Cancelled" },
+          ]}
+        />
 
         <div>
           <label className={labelClass}>Notes</label>
@@ -189,7 +172,7 @@ export function ManualBookingForm({ client }: Props) {
         <button
           type="submit"
           disabled={saving}
-          className="w-full py-2.5 bg-[#3E4F56] text-white text-[12px] tracking-[0.1em] uppercase rounded hover:opacity-90 disabled:opacity-50"
+          className="w-full py-2.5 bg-[#3E4F56] text-white text-[12px] tracking-[0.12em] uppercase rounded-md hover:opacity-90 disabled:opacity-50 transition-opacity"
         >
           {saving ? "Saving…" : "Add booking"}
         </button>

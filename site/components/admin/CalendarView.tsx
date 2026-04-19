@@ -10,6 +10,7 @@ import type { EventResizeDoneArg } from "@fullcalendar/interaction";
 import Link from "next/link";
 import { services } from "@/lib/data";
 import { StatusBadge } from "@/components/admin/StatusBadge";
+import { SelectField } from "@/components/admin/SelectField";
 
 type BookingStatus = "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED" | "NO_SHOW";
 
@@ -80,9 +81,9 @@ const TIMES = Array.from({ length: 23 }, (_, i) => {
 });
 
 const inputCls =
-  "w-full border border-[#3E4F56]/20 rounded px-3 py-2 text-[13px] text-[#3E4F56] bg-[#F5F0E6] focus:outline-none focus:border-[#B28B5D]";
+  "w-full border border-[#3E4F56]/15 rounded-md px-3 py-2.5 text-[13px] text-[#3E4F56] bg-white focus:outline-none focus:border-[#B28B5D] focus:ring-1 focus:ring-[#B28B5D]/30 transition-colors hover:border-[#3E4F56]/30";
 const labelCls =
-  "block text-[11px] tracking-[0.1em] uppercase text-[#A09687] mb-1.5";
+  "block text-[11px] tracking-[0.12em] uppercase text-[#A09687] mb-1.5";
 
 export function CalendarView({ initialBookings, clients }: Props) {
   const calRef = useRef<FullCalendar>(null);
@@ -352,32 +353,20 @@ export function CalendarView({ initialBookings, clients }: Props) {
               </div>
 
               {/* Treatment */}
-              <div>
-                <label className={labelCls}>Treatment</label>
-                <select
-                  value={newForm.serviceId}
-                  onChange={(e) => handleServiceChange(e.target.value)}
-                  className={inputCls}
-                >
-                  {services.map((s) => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                  ))}
-                </select>
-              </div>
+              <SelectField
+                label="Treatment"
+                value={newForm.serviceId}
+                onChange={handleServiceChange}
+                options={services.map((s) => ({ value: s.id, label: s.name }))}
+              />
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className={labelCls}>Duration</label>
-                  <select
-                    value={newForm.duration}
-                    onChange={(e) => handleDurationChange(Number(e.target.value))}
-                    className={inputCls}
-                  >
-                    {selectedSvc.durations.map((d) => (
-                      <option key={d.mins} value={d.mins}>{d.mins} min</option>
-                    ))}
-                  </select>
-                </div>
+                <SelectField
+                  label="Duration"
+                  value={newForm.duration}
+                  onChange={(v) => handleDurationChange(Number(v))}
+                  options={selectedSvc.durations.map((d) => ({ value: d.mins, label: `${d.mins} min` }))}
+                />
                 <div>
                   <label className={labelCls}>Price (£)</label>
                   <input
@@ -400,33 +389,25 @@ export function CalendarView({ initialBookings, clients }: Props) {
                     className={inputCls}
                   />
                 </div>
-                <div>
-                  <label className={labelCls}>Time</label>
-                  <select
-                    value={newForm.time}
-                    onChange={(e) => setNewForm((f) => ({ ...f, time: e.target.value }))}
-                    className={inputCls}
-                  >
-                    {TIMES.map((t) => (
-                      <option key={t} value={t}>{t}</option>
-                    ))}
-                  </select>
-                </div>
+                <SelectField
+                  label="Time"
+                  value={newForm.time}
+                  onChange={(v) => setNewForm((f) => ({ ...f, time: v }))}
+                  options={TIMES.map((t) => ({ value: t, label: t }))}
+                />
               </div>
 
-              <div>
-                <label className={labelCls}>Status</label>
-                <select
-                  value={newForm.status}
-                  onChange={(e) => setNewForm((f) => ({ ...f, status: e.target.value }))}
-                  className={inputCls}
-                >
-                  <option value="CONFIRMED">Confirmed</option>
-                  <option value="PENDING">Pending</option>
-                  <option value="COMPLETED">Completed</option>
-                  <option value="CANCELLED">Cancelled</option>
-                </select>
-              </div>
+              <SelectField
+                label="Status"
+                value={newForm.status}
+                onChange={(v) => setNewForm((f) => ({ ...f, status: v }))}
+                options={[
+                  { value: "CONFIRMED", label: "Confirmed" },
+                  { value: "PENDING", label: "Pending" },
+                  { value: "COMPLETED", label: "Completed" },
+                  { value: "CANCELLED", label: "Cancelled" },
+                ]}
+              />
 
               <div>
                 <label className={labelCls}>Notes</label>
