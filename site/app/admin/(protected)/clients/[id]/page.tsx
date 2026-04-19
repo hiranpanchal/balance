@@ -8,6 +8,7 @@ import { ClientEditor } from "@/components/admin/ClientEditor";
 import { ManualBookingForm } from "@/components/admin/ManualBookingForm";
 import { IntakeSection } from "@/components/admin/IntakeSection";
 import { IntakeDetails } from "@/components/admin/IntakeDetails";
+import { SendPortalLinkButton } from "@/components/admin/SendPortalLinkButton";
 
 export const metadata: Metadata = { title: "Client" };
 export const dynamic = "force-dynamic";
@@ -182,6 +183,10 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
             initialNotes={client.notes}
             initialPhone={client.phone}
             initialGrade={client.grade}
+          />
+          <SendPortalLinkButton
+            clientId={client.id}
+            clientFirstName={client.firstName}
           />
           <IntakeSection
             clientId={client.id}
