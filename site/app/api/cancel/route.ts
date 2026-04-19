@@ -8,6 +8,34 @@ import { getService } from "@/lib/getServices";
 import { createElement } from "react";
 import { Resend } from "resend";
 
+async function notifyWaitlist(date: string, resend: Resend, from: string) {
+  const entries = await db.waitlistEntry.findMany({
+    where: { date, notifiedAt: null },
+  });
+  if (entries.length === 0) return;
+
+  const siteOrigin = process.env.NEXT_PUBLIC_SITE_URL ?? "https://balanceandwellness.vercel.app";
+  const { WaitlistNotification } = await import("@/emails/WaitlistNotification");
+
+  for (const entry of entries) {
+    try {
+      await resend.emails.send({
+        from,
+        to: entry.email,
+        subject: `A slot has opened up — ${new Date(date + "T00:00:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}`,
+        react: createElement(WaitlistNotification, {
+          firstName: entry.firstName,
+          date,
+          bookUrl: `${siteOrigin}/book`,
+        }),
+      });
+      await db.waitlistEntry.update({ where: { id: entry.id }, data: { notifiedAt: new Date() } });
+    } catch (err) {
+      console.error(`Waitlist notification failed for ${entry.email}:`, err);
+    }
+  }
+}
+
 const Schema = z.object({ token: z.string().min(1) });
 
 export async function POST(request: Request) {
@@ -78,6 +106,9 @@ export async function POST(request: Request) {
         text: `Booking cancelled by client.\n\nRef: ${booking.ref}\nName: ${booking.firstName} ${booking.lastName}\nEmail: ${booking.email}\nDate: ${booking.date} at ${booking.time}\nLate cancellation (within 24h): ${lateCancel ? "YES — 50% charge applies" : "No"}`,
       });
     }
+
+    // Notify anyone on the waitlist for this date
+    await notifyWaitlist(booking.date, resend, from);
   } catch (err) {
     console.error("Cancellation email failed:", err);
   }

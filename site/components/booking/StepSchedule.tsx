@@ -213,9 +213,17 @@ export function StepSchedule({
               loadingSlots ? (
                 <p className="text-[14px] text-teal/60">Checking availability…</p>
               ) : slots.length === 0 ? (
-                <p className="text-[14px] text-teal/75">
-                  No slots remaining for that day. Please choose another.
-                </p>
+                <div>
+                  <p className="text-[14px] text-teal/75 mb-3">
+                    No slots remaining for that day.
+                  </p>
+                  <a
+                    href={`/waitlist?date=${selectedDate}${selection.treatment ? `&service=${selection.treatment}` : ""}`}
+                    className="inline-block text-[12px] tracking-[0.12em] uppercase text-gold border-b border-gold/40 hover:border-gold pb-0.5"
+                  >
+                    Join waiting list for this date →
+                  </a>
+                </div>
               ) : (
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                   {slots.map((t) => {

@@ -16,6 +16,7 @@ import {
   FileText,
   Gift,
   LayoutDashboard,
+  Clock,
 } from "lucide-react";
 
 const navItems = [
@@ -26,6 +27,7 @@ const navItems = [
   { href: "/admin/services", label: "Services", icon: Layers },
   { href: "/admin/availability", label: "Availability", icon: Calendar },
   { href: "/admin/vouchers", label: "Vouchers", icon: Gift },
+  { href: "/admin/waitlist", label: "Waitlist", icon: Clock },
   { href: "/admin/reviews", label: "Reviews", icon: Star },
   { href: "/admin/content", label: "Content", icon: Settings },
   { href: "/admin/about", label: "About", icon: FileText },
