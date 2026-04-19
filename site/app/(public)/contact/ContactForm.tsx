@@ -1,47 +1,56 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useRef, useState } from "react";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { TextField, TextAreaField } from "@/components/site/FormField";
 import { Button } from "@/components/site/Button";
 import { Eyebrow } from "@/components/site/Eyebrow";
 
-const schema = z.object({
-  name: z.string().min(2, "Please enter your name."),
-  email: z.string().email("Please enter a valid email."),
-  phone: z.string().optional(),
-  message: z.string().min(10, "A sentence or two will do."),
-});
-
-type FormData = z.infer<typeof schema>;
-
 export function ContactForm() {
-  const [sent, setSent] = useState(false);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    reset,
-  } = useForm<FormData>({ resolver: zodResolver(schema) });
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+  const turnstileRef = useRef<TurnstileInstance>(null);
 
-  const onSubmit = async (data: FormData) => {
-    // TODO: wire in a real contact endpoint.
-    // eslint-disable-next-line no-console
-    console.log("[mock contact message]", data);
-    await new Promise((r) => setTimeout(r, 400));
-    setSent(true);
-    reset();
-  };
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 
-  if (sent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!captchaToken) { setErrorMsg("Please complete the verification below."); return; }
+
+    const fd = new FormData(e.currentTarget);
+    setStatus("submitting");
+    setErrorMsg("");
+
+    const res = await fetch("/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: fd.get("name"),
+        email: fd.get("email"),
+        phone: fd.get("phone") || undefined,
+        message: fd.get("message"),
+        captchaToken,
+      }),
+    });
+
+    if (!res.ok) {
+      const json = await res.json().catch(() => ({}));
+      setErrorMsg(json.error ?? "Something went wrong. Please try again.");
+      setStatus("error");
+      turnstileRef.current?.reset();
+      setCaptchaToken("");
+      return;
+    }
+
+    setStatus("done");
+  }
+
+  if (status === "done") {
     return (
       <div className="bg-cream-light rounded-lg p-10 text-center">
         <Eyebrow>Thank you</Eyebrow>
-        <p className="font-display text-[26px] text-teal mt-4">
-          Your note is with us.
-        </p>
+        <p className="font-display text-[26px] text-teal mt-4">Your note is with us.</p>
         <p className="mt-4 text-[14px] leading-[24px] text-teal/80">
           We&rsquo;ll reply within one working day.
         </p>
@@ -50,35 +59,32 @@ export function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <TextField
-        label="Name"
-        {...register("name")}
-        error={errors.name?.message}
-        autoComplete="name"
-      />
-      <TextField
-        label="Email"
-        type="email"
-        {...register("email")}
-        error={errors.email?.message}
-        autoComplete="email"
-      />
-      <TextField
-        label="Phone (optional)"
-        type="tel"
-        {...register("phone")}
-        error={errors.phone?.message}
-        autoComplete="tel"
-      />
-      <TextAreaField
-        label="Message"
-        {...register("message")}
-        error={errors.message?.message}
-      />
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <TextField label="Name" name="name" required error={undefined} autoComplete="name" />
+      <TextField label="Email" name="email" type="email" required error={undefined} autoComplete="email" />
+      <TextField label="Phone (optional)" name="phone" type="tel" error={undefined} autoComplete="tel" />
+      <TextAreaField label="Message" name="message" required error={undefined} />
+
+      <div>
+        <p className="text-[11px] tracking-[0.15em] uppercase text-teal/60 mb-2">Verification</p>
+        <Turnstile
+          ref={turnstileRef}
+          siteKey={siteKey}
+          onSuccess={setCaptchaToken}
+          onExpire={() => setCaptchaToken("")}
+          options={{ theme: "light", size: "normal" }}
+        />
+      </div>
+
+      {errorMsg && (
+        <p className="text-[14px] text-red-600 bg-red-50 border border-red-200 rounded-md px-4 py-3">
+          {errorMsg}
+        </p>
+      )}
+
       <div className="pt-2">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Sending…" : "Send message"}
+        <Button type="submit" disabled={status === "submitting"}>
+          {status === "submitting" ? "Sending…" : "Send message"}
         </Button>
       </div>
     </form>

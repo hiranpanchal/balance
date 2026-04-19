@@ -153,6 +153,7 @@ model Review {
   company      String   @default("")
   body         String   @db.Text
   rating       Int      @default(5)
+  published    Boolean  @default(false)
   displayOrder Int      @default(0)
   createdAt    DateTime @default(now())
 }

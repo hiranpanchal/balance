@@ -26,6 +26,7 @@ export async function POST(request: Request) {
         company: data.company ?? "",
         body: data.body,
         rating: data.rating,
+        published: true,
       },
     });
     return NextResponse.json(review, { status: 201 });

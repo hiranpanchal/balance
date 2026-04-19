@@ -44,7 +44,7 @@ export default async function HomePage() {
   const [content, allServices, latestReviews] = await Promise.all([
     getSiteContent(),
     getServices(),
-    db.review.findMany({ orderBy: [{ displayOrder: "asc" }, { createdAt: "desc" }], take: 4 }),
+    db.review.findMany({ where: { published: true }, orderBy: [{ displayOrder: "asc" }, { createdAt: "desc" }], take: 4 }),
   ]);
   const { studio } = content;
   const featuredServices = featuredServiceIds

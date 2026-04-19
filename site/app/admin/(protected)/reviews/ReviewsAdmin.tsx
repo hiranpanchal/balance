@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2 } from "lucide-react";
+import { Trash2, Eye, EyeOff } from "lucide-react";
 
 interface Review {
   id: string;
@@ -10,6 +10,7 @@ interface Review {
   company: string;
   body: string;
   rating: number;
+  published: boolean;
   createdAt: string;
 }
 
@@ -39,9 +40,7 @@ function StarDisplay({ rating }: { rating: number }) {
   return (
     <span className="flex gap-0.5">
       {[1, 2, 3, 4, 5].map((n) => (
-        <span key={n} style={{ color: n <= rating ? "#B28B5D" : "#D1C4B0" }} className="text-[16px]">
-          ★
-        </span>
+        <span key={n} style={{ color: n <= rating ? "#B28B5D" : "#D1C4B0" }} className="text-[15px]">★</span>
       ))}
     </span>
   );
@@ -56,7 +55,11 @@ export function ReviewsAdmin({ initialReviews }: { initialReviews: Review[] }) {
   const [rating, setRating] = useState(5);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const drafts = reviews.filter((r) => !r.published);
+  const published = reviews.filter((r) => r.published);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -67,18 +70,26 @@ export function ReviewsAdmin({ initialReviews }: { initialReviews: Review[] }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, company, body, rating }),
     });
-    if (!res.ok) {
-      setError("Failed to save review.");
-      setSaving(false);
-      return;
-    }
+    if (!res.ok) { setError("Failed to save review."); setSaving(false); return; }
     const created = await res.json();
     setReviews((prev) => [created, ...prev]);
-    setName("");
-    setCompany("");
-    setBody("");
-    setRating(5);
+    setName(""); setCompany(""); setBody(""); setRating(5);
     setSaving(false);
+    router.refresh();
+  }
+
+  async function togglePublish(r: Review) {
+    setTogglingId(r.id);
+    const res = await fetch(`/api/admin/reviews/${r.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ published: !r.published }),
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      setReviews((prev) => prev.map((x) => (x.id === r.id ? updated : x)));
+    }
+    setTogglingId(null);
     router.refresh();
   }
 
@@ -90,94 +101,106 @@ export function ReviewsAdmin({ initialReviews }: { initialReviews: Review[] }) {
     router.refresh();
   }
 
+  function ReviewCard({ r }: { r: Review }) {
+    return (
+      <div className={`bg-white rounded-lg shadow-sm p-5 border-l-4 ${r.published ? "border-l-green-400" : "border-l-amber-400"}`}>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 flex-wrap">
+              <StarDisplay rating={r.rating} />
+              <span className="font-serif text-[15px] text-[#3E4F56]">{r.name}</span>
+              {r.company && <span className="text-[12px] text-[#A09687]">· {r.company}</span>}
+              <span className={`text-[10px] tracking-[0.12em] uppercase px-2 py-0.5 rounded-full ${r.published ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"}`}>
+                {r.published ? "Published" : "Draft"}
+              </span>
+            </div>
+            <p className="mt-2 text-[13px] leading-[22px] text-[#3E4F56]/80">{r.body}</p>
+            <p className="mt-2 text-[11px] text-[#A09687]">
+              {new Date(r.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0 mt-0.5">
+            <button
+              type="button"
+              onClick={() => togglePublish(r)}
+              disabled={togglingId === r.id}
+              className="text-[#A09687] hover:text-[#3E4F56] transition-colors disabled:opacity-40"
+              aria-label={r.published ? "Unpublish" : "Publish"}
+              title={r.published ? "Unpublish" : "Publish"}
+            >
+              {r.published ? <EyeOff size={15} strokeWidth={1.5} /> : <Eye size={15} strokeWidth={1.5} />}
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDelete(r.id)}
+              disabled={deletingId === r.id}
+              className="text-[#A09687] hover:text-red-500 transition-colors disabled:opacity-40"
+              aria-label="Delete review"
+            >
+              <Trash2 size={15} strokeWidth={1.5} />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="grid md:grid-cols-[380px_1fr] gap-8 items-start">
+    <div className="grid md:grid-cols-[360px_1fr] gap-8 items-start">
       {/* Add form */}
       <div className="bg-white rounded-lg shadow-sm p-6">
         <h2 className="text-[11px] tracking-[0.12em] uppercase text-[#A09687] mb-5">Add review</h2>
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-[12px] text-red-700">{error}</div>
-        )}
+        {error && <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-[12px] text-red-700">{error}</div>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className={labelCls}>Name *</label>
-            <input
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Jane Smith"
-              className={inputCls}
-            />
+            <input required value={name} onChange={(e) => setName(e.target.value)} placeholder="Jane Smith" className={inputCls} />
           </div>
           <div>
             <label className={labelCls}>Company (optional)</label>
-            <input
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-              placeholder="Acme Ltd"
-              className={inputCls}
-            />
+            <input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Acme Ltd" className={inputCls} />
           </div>
           <div>
             <label className={labelCls}>Review *</label>
-            <textarea
-              required
-              rows={4}
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              placeholder="What did they say?"
-              className={`${inputCls} resize-none leading-[22px]`}
-            />
+            <textarea required rows={4} value={body} onChange={(e) => setBody(e.target.value)} placeholder="What did they say?" className={`${inputCls} resize-none leading-[22px]`} />
           </div>
           <div>
             <label className={labelCls}>Rating</label>
             <StarPicker value={rating} onChange={setRating} />
           </div>
-          <button
-            type="submit"
-            disabled={saving}
-            className="w-full py-2.5 bg-[#3E4F56] text-white text-[12px] tracking-[0.12em] uppercase rounded-md hover:opacity-90 disabled:opacity-50 transition-opacity"
-          >
+          <button type="submit" disabled={saving} className="w-full py-2.5 bg-[#3E4F56] text-white text-[12px] tracking-[0.12em] uppercase rounded-md hover:opacity-90 disabled:opacity-50 transition-opacity">
             {saving ? "Saving…" : "Add review"}
           </button>
         </form>
       </div>
 
-      {/* Reviews list */}
-      <div className="space-y-3">
-        {reviews.length === 0 && (
-          <div className="bg-white rounded-lg shadow-sm p-8 text-center text-[13px] text-[#A09687]">
-            No reviews yet. Add your first one.
-          </div>
-        )}
-        {reviews.map((r) => (
-          <div key={r.id} className="bg-white rounded-lg shadow-sm p-5">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <StarDisplay rating={r.rating} />
-                  <span className="font-serif text-[15px] text-[#3E4F56]">{r.name}</span>
-                  {r.company && (
-                    <span className="text-[12px] text-[#A09687]">· {r.company}</span>
-                  )}
-                </div>
-                <p className="mt-2 text-[13px] leading-[22px] text-[#3E4F56]/80">{r.body}</p>
-                <p className="mt-2 text-[11px] text-[#A09687]">
-                  {new Date(r.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => handleDelete(r.id)}
-                disabled={deletingId === r.id}
-                className="text-[#A09687] hover:text-red-500 transition-colors disabled:opacity-40 shrink-0 mt-0.5"
-                aria-label="Delete review"
-              >
-                <Trash2 size={15} strokeWidth={1.5} />
-              </button>
+      {/* Lists */}
+      <div className="space-y-8">
+        {drafts.length > 0 && (
+          <div>
+            <h2 className="text-[11px] tracking-[0.12em] uppercase text-amber-600 mb-3">
+              Awaiting approval ({drafts.length})
+            </h2>
+            <div className="space-y-3">
+              {drafts.map((r) => <ReviewCard key={r.id} r={r} />)}
             </div>
           </div>
-        ))}
+        )}
+
+        <div>
+          <h2 className="text-[11px] tracking-[0.12em] uppercase text-[#A09687] mb-3">
+            Published ({published.length})
+          </h2>
+          {published.length === 0 ? (
+            <div className="bg-white rounded-lg shadow-sm p-8 text-center text-[13px] text-[#A09687]">
+              No published reviews yet.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {published.map((r) => <ReviewCard key={r.id} r={r} />)}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
