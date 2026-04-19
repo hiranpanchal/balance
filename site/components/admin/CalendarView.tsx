@@ -90,9 +90,19 @@ export function CalendarView({ initialBookings, clients }: Props) {
 
   // New booking modal
   const [newModal, setNewModal] = useState<{ date: string; time: string } | null>(null);
-  const [newForm, setNewForm] = useState({
+  const [newForm, setNewForm] = useState<{
+    clientQuery: string;
+    selectedClient: Client | null;
+    serviceId: string;
+    duration: number;
+    price: number;
+    time: string;
+    date: string;
+    notes: string;
+    status: string;
+  }>({
     clientQuery: "",
-    selectedClient: null as Client | null,
+    selectedClient: null,
     serviceId: services[0].id,
     duration: services[0].durations[0].mins,
     price: services[0].durations[0].price,
