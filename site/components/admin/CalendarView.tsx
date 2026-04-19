@@ -8,9 +8,9 @@ import interactionPlugin from "@fullcalendar/interaction";
 import type { EventClickArg, DateSelectArg, EventDropArg, EventInput } from "@fullcalendar/core";
 import type { EventResizeDoneArg } from "@fullcalendar/interaction";
 import Link from "next/link";
-import { services } from "@/lib/data";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { SelectField } from "@/components/admin/SelectField";
+import type { Service } from "@/lib/types";
 
 type BookingStatus = "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED" | "NO_SHOW";
 
@@ -41,6 +41,7 @@ interface Client {
 interface Props {
   initialBookings: Booking[];
   clients: Client[];
+  services: Service[];
 }
 
 const STATUS_COLORS: Record<BookingStatus, string> = {
@@ -85,7 +86,7 @@ const inputCls =
 const labelCls =
   "block text-[11px] tracking-[0.12em] uppercase text-[#A09687] mb-1.5";
 
-export function CalendarView({ initialBookings, clients }: Props) {
+export function CalendarView({ initialBookings, clients, services }: Props) {
   const calRef = useRef<FullCalendar>(null);
   const [bookings, setBookings] = useState<Booking[]>(initialBookings);
 

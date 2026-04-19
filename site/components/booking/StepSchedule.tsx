@@ -6,7 +6,7 @@ import { Eyebrow } from "@/components/site/Eyebrow";
 import { Button } from "@/components/site/Button";
 import { BookingSummary } from "./BookingSummary";
 import { slotsFor } from "@/lib/data";
-import type { BookingSelection } from "@/lib/types";
+import type { BookingSelection, Service } from "@/lib/types";
 
 function toISODate(d: Date) {
   const y = d.getFullYear();
@@ -22,10 +22,12 @@ function meetsCutoff(dateISO: string, time: string) {
 }
 
 export function StepSchedule({
+  services,
   selection,
   update,
   next,
 }: {
+  services: Service[];
   selection: BookingSelection;
   update: (patch: Partial<BookingSelection>) => void;
   next: () => void;
@@ -233,7 +235,7 @@ export function StepSchedule({
           </div>
         </div>
 
-        <BookingSummary selection={selection} />
+        <BookingSummary services={services} selection={selection} />
       </div>
 
       <div className="mt-14 flex justify-center">

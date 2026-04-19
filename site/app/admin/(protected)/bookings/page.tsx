@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { services } from "@/lib/data";
+import { getServices } from "@/lib/getServices";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { BookingFilters } from "@/components/admin/BookingFilters";
 
@@ -20,7 +20,7 @@ export default async function BookingsPage({ searchParams }: Props) {
   if (searchParams.status) where.status = searchParams.status;
   if (searchParams.date) where.date = searchParams.date;
 
-  const [bookings, total] = await Promise.all([
+  const [bookings, total, services] = await Promise.all([
     db.booking.findMany({
       where,
       orderBy: [{ date: "desc" }, { time: "asc" }],
@@ -28,6 +28,7 @@ export default async function BookingsPage({ searchParams }: Props) {
       take: limit,
     }),
     db.booking.count({ where }),
+    getServices(),
   ]);
 
   const pages = Math.ceil(total / limit);

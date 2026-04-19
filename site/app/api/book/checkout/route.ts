@@ -4,7 +4,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import Stripe from "stripe";
 import { db } from "@/lib/db";
-import { services, priceFor } from "@/lib/data";
+import { priceFor } from "@/lib/data";
+import { getService } from "@/lib/getServices";
 import { priceForFromDb } from "@/lib/getServices";
 
 const CheckoutSchema = z.object({
@@ -48,7 +49,8 @@ export async function POST(request: Request) {
     }
 
     const ref = generateRef();
-    const serviceName = services.find((s) => s.id === data.treatment)?.name ?? data.treatment;
+    const svc = await getService(data.treatment);
+    const serviceName = svc?.name ?? data.treatment;
     const depositPence = depositAmount(data.price * 100);
     const origin = request.headers.get("origin") ?? "https://balanceandwellness.com";
 

@@ -3,16 +3,18 @@
 import { Eyebrow } from "@/components/site/Eyebrow";
 import { Button } from "@/components/site/Button";
 import { GoldRule } from "@/components/site/GoldRule";
-import { services, therapist, priceFor } from "@/lib/data";
-import type { BookingSelection } from "@/lib/types";
+import { therapist } from "@/lib/data";
+import type { BookingSelection, Service } from "@/lib/types";
 
 export function StepConfirm({
+  services,
   selection,
   onConfirm,
   edit,
   confirming,
   confirmError,
 }: {
+  services: Service[];
   selection: BookingSelection;
   onConfirm: () => void;
   edit: (step: number) => void;
@@ -22,7 +24,7 @@ export function StepConfirm({
   const svc = services.find((s) => s.id === selection.treatment);
   const price =
     selection.treatment && selection.duration
-      ? priceFor(selection.treatment, selection.duration)
+      ? (svc?.durations.find((d) => d.mins === selection.duration)?.price ?? null)
       : null;
 
   const dateLabel =

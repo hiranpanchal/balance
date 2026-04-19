@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { CalendarView } from "@/components/admin/CalendarView";
+import { getServices } from "@/lib/getServices";
 
 export const metadata: Metadata = { title: "Calendar" };
 export const dynamic = "force-dynamic";
 
 export default async function CalendarPage() {
-  const [bookings, clients] = await Promise.all([
+  const [bookings, clients, services] = await Promise.all([
     db.booking.findMany({
       where: { status: { not: "CANCELLED" } },
       orderBy: { date: "asc" },
     }),
     db.client.findMany({ orderBy: [{ lastName: "asc" }, { firstName: "asc" }] }),
+    getServices(),
   ]);
 
   return (
@@ -26,6 +28,7 @@ export default async function CalendarPage() {
       <CalendarView
         initialBookings={JSON.parse(JSON.stringify(bookings))}
         clients={JSON.parse(JSON.stringify(clients))}
+        services={services}
       />
     </div>
   );

@@ -7,7 +7,7 @@ import { Eyebrow } from "@/components/site/Eyebrow";
 import { Button } from "@/components/site/Button";
 import { TextField, TextAreaField } from "@/components/site/FormField";
 import { BookingSummary } from "./BookingSummary";
-import type { BookingSelection } from "@/lib/types";
+import type { BookingSelection, Service } from "@/lib/types";
 
 const schema = z.object({
   firstName: z.string().min(1, "Required."),
@@ -24,10 +24,12 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export function StepDetails({
+  services,
   selection,
   update,
   next,
 }: {
+  services: Service[];
   selection: BookingSelection;
   update: (patch: Partial<BookingSelection>) => void;
   next: () => void;
@@ -174,7 +176,7 @@ export function StepDetails({
           </div>
         </div>
 
-        <BookingSummary selection={selection} />
+        <BookingSummary services={services} selection={selection} />
       </form>
     </div>
   );

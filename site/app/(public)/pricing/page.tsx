@@ -3,8 +3,11 @@ import Link from "next/link";
 import { Eyebrow } from "@/components/site/Eyebrow";
 import { GoldRule } from "@/components/site/GoldRule";
 import { Button } from "@/components/site/Button";
-import { services, faq } from "@/lib/data";
+import { faq } from "@/lib/data";
 import { getPageDescription } from "@/lib/content";
+import { getServices } from "@/lib/getServices";
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -16,7 +19,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const services = await getServices();
   return (
     <>
       <section className="pt-24 md:pt-32 pb-10 px-6 md:px-12">

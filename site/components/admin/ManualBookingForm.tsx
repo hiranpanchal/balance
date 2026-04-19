@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { services } from "@/lib/data";
 import { SelectField } from "@/components/admin/SelectField";
+import type { Service } from "@/lib/types";
 
 interface Props {
   client: {
@@ -12,6 +12,7 @@ interface Props {
     email: string;
     phone: string;
   };
+  services: Service[];
 }
 
 const times = [
@@ -25,7 +26,7 @@ const inputClass =
 const labelClass =
   "block text-[11px] tracking-[0.12em] uppercase text-[#A09687] mb-1.5";
 
-export function ManualBookingForm({ client }: Props) {
+export function ManualBookingForm({ client, services }: Props) {
   const router = useRouter();
   const [serviceId, setServiceId] = useState<string>(services[0].id);
   const [duration, setDuration] = useState<number>(services[0].durations[0].mins);

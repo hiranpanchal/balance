@@ -42,7 +42,7 @@ export default async function PublicLayout({ children }: { children: React.React
       <main id="main" className="min-h-[60vh]">
         {children}
       </main>
-      <Footer />
+      <Footer studio={studio} />
       <CookieBanner />
     </>
   );

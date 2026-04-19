@@ -2,14 +2,15 @@
 
 import { Eyebrow } from "@/components/site/Eyebrow";
 import { Button } from "@/components/site/Button";
-import { services } from "@/lib/data";
-import type { BookingSelection, DurationMins, ServiceId } from "@/lib/types";
+import type { BookingSelection, DurationMins, Service, ServiceId } from "@/lib/types";
 
 export function StepTreatment({
+  services,
   selection,
   update,
   next,
 }: {
+  services: Service[];
   selection: BookingSelection;
   update: (patch: Partial<BookingSelection>) => void;
   next: () => void;

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { services } from "@/lib/data";
+import { getServices } from "@/lib/getServices";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { ClientEditor } from "@/components/admin/ClientEditor";
 import { ManualBookingForm } from "@/components/admin/ManualBookingForm";
@@ -21,7 +21,7 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
 
   const today = new Date().toISOString().split("T")[0];
 
-  const [upcoming, past] = await Promise.all([
+  const [upcoming, past, services] = await Promise.all([
     db.booking.findMany({
       where: { email: client.email, date: { gte: today } },
       orderBy: { date: "asc" },
@@ -30,6 +30,7 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
       where: { email: client.email, date: { lt: today } },
       orderBy: { date: "desc" },
     }),
+    getServices(),
   ]);
 
   const totalSpent = [...upcoming, ...past].reduce((sum, b) => sum + b.price, 0);
@@ -184,6 +185,7 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
               email: client.email,
               phone: client.phone,
             }}
+            services={services}
           />
         </div>
       </div>

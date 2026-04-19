@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { services } from "@/lib/data";
+import { getService } from "@/lib/getServices";
 import { getSiteContent } from "@/lib/content";
 
 const BookingSchema = z.object({
@@ -59,15 +59,14 @@ export async function POST(request: Request) {
 
     // Send confirmation email (non-blocking — don't fail booking if email fails)
     try {
-      const serviceName =
-        services.find((s) => s.id === data.treatment)?.name ?? data.treatment;
-
-      const [{ Resend }, { createElement }, { BookingConfirmation }, siteContent] = await Promise.all([
+      const [{ Resend }, { createElement }, { BookingConfirmation }, siteContent, svc] = await Promise.all([
         import("resend"),
         import("react"),
         import("@/emails/BookingConfirmation"),
         getSiteContent(),
+        getService(data.treatment),
       ]);
+      const serviceName = svc?.name ?? data.treatment;
 
       const resend = new Resend(process.env.RESEND_API_KEY);
 

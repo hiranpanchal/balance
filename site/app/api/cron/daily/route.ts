@@ -5,7 +5,7 @@ import { createElement } from "react";
 import { Resend } from "resend";
 import { render } from "@react-email/render";
 import { db } from "@/lib/db";
-import { services } from "@/lib/data";
+import { getServices } from "@/lib/getServices";
 import { getSiteContent } from "@/lib/content";
 import { BookingReminder } from "@/emails/BookingReminder";
 import { ReviewRequest } from "@/emails/ReviewRequest";
@@ -30,7 +30,7 @@ export async function GET(request: Request) {
   yesterday.setDate(yesterday.getDate() - 1);
   const yesterdayStr = yesterday.toISOString().split("T")[0];
 
-  const [siteContent, tomorrowBookings, yesterdayBookings, reviewUrlRow] = await Promise.all([
+  const [siteContent, tomorrowBookings, yesterdayBookings, reviewUrlRow, services] = await Promise.all([
     getSiteContent(),
     db.booking.findMany({
       where: { date: tomorrowStr, status: { in: ["CONFIRMED"] } },
@@ -39,6 +39,7 @@ export async function GET(request: Request) {
       where: { date: yesterdayStr, status: { in: ["CONFIRMED", "COMPLETED"] } },
     }),
     db.content.findUnique({ where: { key: "seo.googleReviewsUrl" } }),
+    getServices(),
   ]);
 
   const studioAddress = siteContent.studio.addressLines.join("\n");

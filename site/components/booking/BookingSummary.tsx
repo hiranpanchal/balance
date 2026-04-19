@@ -1,12 +1,12 @@
 import { Eyebrow } from "@/components/site/Eyebrow";
-import { services, priceFor, therapist } from "@/lib/data";
-import type { BookingSelection } from "@/lib/types";
+import { therapist } from "@/lib/data";
+import type { BookingSelection, Service } from "@/lib/types";
 
-export function BookingSummary({ selection }: { selection: BookingSelection }) {
+export function BookingSummary({ selection, services }: { selection: BookingSelection; services: Service[] }) {
   const svc = services.find((s) => s.id === selection.treatment);
   const price =
     selection.treatment && selection.duration
-      ? priceFor(selection.treatment, selection.duration)
+      ? (svc?.durations.find((d) => d.mins === selection.duration)?.price ?? null)
       : null;
 
   const dateLabel =

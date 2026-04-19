@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { services } from "@/lib/data";
+import { getService } from "@/lib/getServices";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { BookingActions } from "@/components/admin/BookingActions";
 
@@ -13,7 +13,8 @@ export default async function BookingDetailPage({ params }: { params: { id: stri
   const booking = await db.booking.findUnique({ where: { id: params.id } });
   if (!booking) notFound();
 
-  const svcName = services.find((s) => s.id === booking.service)?.name ?? booking.service;
+  const svc = await getService(booking.service);
+  const svcName = svc?.name ?? booking.service;
 
   return (
     <div>

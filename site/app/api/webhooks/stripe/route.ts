@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createElement } from "react";
 import { db } from "@/lib/db";
-import { services } from "@/lib/data";
+import { getService } from "@/lib/getServices";
 import { getSiteContent } from "@/lib/content";
 
 export async function POST(request: Request) {
@@ -36,15 +36,16 @@ export async function POST(request: Request) {
 
     // Send confirmation email (non-blocking)
     try {
-      const [{ Resend }, { BookingConfirmation }, siteContent] = await Promise.all([
+      const [{ Resend }, { BookingConfirmation }, siteContent, svc] = await Promise.all([
         import("resend"),
         import("@/emails/BookingConfirmation"),
         getSiteContent(),
+        getService(booking.service),
       ]);
 
       const resend = new Resend(process.env.RESEND_API_KEY);
       const from = process.env.EMAIL_FROM ?? "Balance & Wellness <hello@balanceandwellness.com>";
-      const serviceName = services.find((s) => s.id === booking.service)?.name ?? booking.service;
+      const serviceName = svc?.name ?? booking.service;
 
       await resend.emails.send({
         from,

@@ -7,8 +7,7 @@ import { StepTreatment } from "./StepTreatment";
 import { StepSchedule } from "./StepSchedule";
 import { StepDetails } from "./StepDetails";
 import { StepConfirm } from "./StepConfirm";
-import { priceFor } from "@/lib/data";
-import type { BookingSelection, DurationMins, ServiceId } from "@/lib/types";
+import type { BookingSelection, DurationMins, Service, ServiceId } from "@/lib/types";
 
 const SS_KEY = "bw_booking_draft_v2";
 const TOTAL_STEPS = 4;
@@ -24,7 +23,11 @@ const VALID_TREATMENTS: ServiceId[] = [
   "hot-stones",
 ];
 
-export function BookingWizard() {
+function priceFor(services: Service[], serviceId: ServiceId, mins: DurationMins): number | null {
+  return services.find((s) => s.id === serviceId)?.durations.find((d) => d.mins === mins)?.price ?? null;
+}
+
+export function BookingWizard({ services }: { services: Service[] }) {
   const router = useRouter();
   const params = useSearchParams();
 
@@ -102,7 +105,7 @@ export function BookingWizard() {
     )
       return;
 
-    const price = priceFor(selection.treatment, selection.duration) ?? 0;
+    const price = priceFor(services, selection.treatment, selection.duration) ?? 0;
     setConfirming(true);
     setConfirmError("");
 
@@ -176,6 +179,7 @@ export function BookingWizard() {
       <div className="max-w-[1200px] mx-auto px-6 md:px-12 pb-24">
         {step === 1 && (
           <StepTreatment
+            services={services}
             selection={selection}
             update={update}
             next={() => setStep(2)}
@@ -183,6 +187,7 @@ export function BookingWizard() {
         )}
         {step === 2 && (
           <StepSchedule
+            services={services}
             selection={selection}
             update={update}
             next={() => setStep(3)}
@@ -190,6 +195,7 @@ export function BookingWizard() {
         )}
         {step === 3 && (
           <StepDetails
+            services={services}
             selection={selection}
             update={update}
             next={() => setStep(4)}
@@ -197,6 +203,7 @@ export function BookingWizard() {
         )}
         {step === 4 && (
           <StepConfirm
+            services={services}
             selection={selection}
             onConfirm={handleConfirm}
             edit={(targetStep) => setStep(targetStep)}

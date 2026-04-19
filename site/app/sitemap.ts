@@ -1,9 +1,11 @@
 import type { MetadataRoute } from "next";
-import { services, journalPosts } from "@/lib/data";
+import { journalPosts } from "@/lib/data";
+import { getServices } from "@/lib/getServices";
 
 const BASE_URL = "https://balanceandwellness.com";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [services] = await Promise.all([getServices()]);
   const now = new Date();
   const staticPaths = [
     "",
