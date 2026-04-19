@@ -175,7 +175,7 @@ export function AboutEditor(props: Props) {
       {/* Gallery */}
       <div className="bg-white rounded-lg shadow-sm p-6">
         <h2 className="font-serif text-[20px] text-[#3E4F56] font-normal mb-1">Gallery</h2>
-        <p className="text-[12px] text-[#A09687] mb-5">Photos shown in the "Inside the studio" section.</p>
+        <p className="text-[12px] text-[#A09687] mb-5">Photos shown in the &ldquo;Inside the studio&rdquo; section.</p>
         <div className="space-y-6">
           {gallery.map((g, i) => (
             <div key={i} className="border border-[#3E4F56]/10 rounded-lg p-4 space-y-3">
