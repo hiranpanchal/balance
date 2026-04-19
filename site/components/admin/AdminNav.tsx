@@ -13,6 +13,7 @@ import {
   Settings,
   Star,
   Users,
+  FileText,
 } from "lucide-react";
 
 const navItems = [
@@ -23,6 +24,7 @@ const navItems = [
   { href: "/admin/availability", label: "Availability", icon: Calendar },
   { href: "/admin/reviews", label: "Reviews", icon: Star },
   { href: "/admin/content", label: "Content", icon: Settings },
+  { href: "/admin/about", label: "About", icon: FileText },
   { href: "/admin/journal", label: "Journal", icon: BookOpen },
   { href: "/admin/images", label: "Images", icon: ImageIcon },
 ];

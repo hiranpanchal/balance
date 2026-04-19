@@ -3,8 +3,11 @@ import { Eyebrow } from "@/components/site/Eyebrow";
 import { GoldRule } from "@/components/site/GoldRule";
 import { Button } from "@/components/site/Button";
 import { ImgPlaceholder } from "@/components/site/ImgPlaceholder";
-import { therapist, values } from "@/lib/data";
+import { therapist as fallbackTherapist, values as fallbackValues } from "@/lib/data";
 import { getPageDescription } from "@/lib/content";
+import { db } from "@/lib/db";
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -16,34 +19,37 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-const GALLERY = [
-  {
-    src: "https://images.unsplash.com/photo-1600180758890-6b94519a8ba6?auto=format&fit=crop&w=1200&q=80",
-    label: "The reception room",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=1200&q=80",
-    label: "The treatment room",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80",
-    label: "Bespoke oils",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1600334129128-685c5582fd35?auto=format&fit=crop&w=1200&q=80",
-    label: "Linen and light",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1200&q=80",
-    label: "Warmth and stone",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=1200&q=80",
-    label: "A quiet hour",
-  },
+const GALLERY_FALLBACK = [
+  { src: "https://images.unsplash.com/photo-1600180758890-6b94519a8ba6?auto=format&fit=crop&w=1200&q=80", label: "The reception room" },
+  { src: "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=1200&q=80", label: "The treatment room" },
+  { src: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80", label: "Bespoke oils" },
+  { src: "https://images.unsplash.com/photo-1600334129128-685c5582fd35?auto=format&fit=crop&w=1200&q=80", label: "Linen and light" },
+  { src: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1200&q=80", label: "Warmth and stone" },
+  { src: "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=1200&q=80", label: "A quiet hour" },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const rows = await db.content.findMany({
+    where: { key: { startsWith: "about." } },
+  });
+  const c = Object.fromEntries(rows.map((r) => [r.key, r.value]));
+
+  const therapist = {
+    name: c["about.therapist.name"] ?? fallbackTherapist.name,
+    role: c["about.therapist.role"] ?? fallbackTherapist.role,
+    bio: c["about.therapist.bio"] ?? fallbackTherapist.bio,
+    image: c["about.therapist.image"] ?? fallbackTherapist.image,
+  };
+
+  let values = fallbackValues;
+  let gallery = GALLERY_FALLBACK;
+  try { if (c["about.values"]) values = JSON.parse(c["about.values"]); } catch { /* keep fallback */ }
+  try { if (c["about.gallery"]) gallery = JSON.parse(c["about.gallery"]); } catch { /* keep fallback */ }
+
+  const intro =
+    c["about.intro"] ||
+    "Balance and Wellness is a one-therapist studio, run by Mukti Panchal. One guest at a time. One room. A kettle that is always on. The aim is simple — to offer a genuinely unhurried hour, by a therapist who has practised the craft for years.";
+
   return (
     <>
       <section className="pt-24 md:pt-32 pb-16 px-6 md:px-12">
@@ -56,10 +62,7 @@ export default function AboutPage() {
             <GoldRule width="w-12" />
           </div>
           <p className="mt-10 text-[17px] leading-[30px] max-w-[640px] mx-auto text-teal/85">
-            Balance and Wellness is a one-therapist studio, run by Mukti
-            Panchal. One guest at a time. One room. A kettle that is always on.
-            The aim is simple — to offer a genuinely unhurried hour, by a
-            therapist who has practised the craft for years.
+            {intro}
           </p>
         </div>
       </section>
@@ -97,60 +100,60 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="py-20 px-6 md:px-12 bg-cream-light">
-        <div className="max-w-[1180px] mx-auto">
-          <div className="text-center">
-            <Eyebrow>What we come back to</Eyebrow>
-            <h2 className="font-display text-[32px] md:text-[40px] leading-[1.15] mt-4 text-teal">
-              Five words that shape the studio.
-            </h2>
-          </div>
-          <div className="grid md:grid-cols-5 gap-6 mt-14">
-            {values.map((v) => (
-              <div
-                key={v.name}
-                className="text-center p-6 border border-teal/10 rounded-lg bg-cream"
-              >
-                <div className="font-display text-[20px] text-teal">
-                  {v.name}
+      {values.length > 0 && (
+        <section className="py-20 px-6 md:px-12 bg-cream-light">
+          <div className="max-w-[1180px] mx-auto">
+            <div className="text-center">
+              <Eyebrow>What we come back to</Eyebrow>
+              <h2 className="font-display text-[32px] md:text-[40px] leading-[1.15] mt-4 text-teal">
+                Five words that shape the studio.
+              </h2>
+            </div>
+            <div className="grid md:grid-cols-5 gap-6 mt-14">
+              {values.map((v) => (
+                <div
+                  key={v.name}
+                  className="text-center p-6 border border-teal/10 rounded-lg bg-cream"
+                >
+                  <div className="font-display text-[20px] text-teal">{v.name}</div>
+                  <div className="mt-3 flex justify-center">
+                    <GoldRule width="w-5" />
+                  </div>
+                  <p className="mt-4 text-[13px] leading-[22px] text-teal/80">{v.body}</p>
                 </div>
-                <div className="mt-3 flex justify-center">
-                  <GoldRule width="w-5" />
-                </div>
-                <p className="mt-4 text-[13px] leading-[22px] text-teal/80">
-                  {v.body}
-                </p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      <section className="py-20 md:py-24 px-6 md:px-12">
-        <div className="max-w-[1280px] mx-auto">
-          <div className="text-center">
-            <Eyebrow>The space</Eyebrow>
-            <h2 className="font-display text-[32px] md:text-[40px] leading-[1.15] mt-4 text-teal">
-              Inside the studio.
-            </h2>
+      {gallery.length > 0 && (
+        <section className="py-20 md:py-24 px-6 md:px-12">
+          <div className="max-w-[1280px] mx-auto">
+            <div className="text-center">
+              <Eyebrow>The space</Eyebrow>
+              <h2 className="font-display text-[32px] md:text-[40px] leading-[1.15] mt-4 text-teal">
+                Inside the studio.
+              </h2>
+            </div>
+            <div className="mt-14 grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+              {gallery.map((img) => (
+                <figure key={img.label}>
+                  <ImgPlaceholder
+                    src={img.src}
+                    alt={img.label}
+                    label={img.label}
+                    ratio="4 / 5"
+                  />
+                  <figcaption className="mt-3 text-[11px] tracking-[0.22em] uppercase text-stone">
+                    {img.label}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
           </div>
-          <div className="mt-14 grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-            {GALLERY.map((img) => (
-              <figure key={img.label}>
-                <ImgPlaceholder
-                  src={img.src}
-                  alt={img.label}
-                  label={img.label}
-                  ratio="4 / 5"
-                />
-                <figcaption className="mt-3 text-[11px] tracking-[0.22em] uppercase text-stone">
-                  {img.label}
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
     </>
   );
 }
