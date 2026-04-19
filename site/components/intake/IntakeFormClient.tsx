@@ -10,9 +10,14 @@ interface Props {
 interface FormData {
   dateOfBirth: string;
   occupation: string;
-  address: string;
+  addressLine1: string;
+  addressTown: string;
+  addressPostcode: string;
   emergencyName: string;
   emergencyPhone: string;
+  gpName: string;
+  gpPractice: string;
+  gpPhone: string;
   conditions: string[];
   medications: string;
   allergies: string;
@@ -72,9 +77,13 @@ export function IntakeFormClient({ token, clientName }: Props) {
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [postcodeSearching, setPostcodeSearching] = useState(false);
+  const [postcodeError, setPostcodeError] = useState("");
   const [form, setForm] = useState<FormData>({
-    dateOfBirth: "", occupation: "", address: "",
+    dateOfBirth: "", occupation: "",
+    addressLine1: "", addressTown: "", addressPostcode: "",
     emergencyName: "", emergencyPhone: "",
+    gpName: "", gpPractice: "", gpPhone: "",
     conditions: [], medications: "", allergies: "", recentInjury: "", isPregnant: false,
     painAreas: [], painNotes: "", previousMassage: false, massageFrequency: "",
     pressurePreference: "medium", areasToAvoid: "", goals: "",
@@ -92,13 +101,37 @@ export function IntakeFormClient({ token, clientName }: Props) {
     });
   }
 
+  async function lookupPostcode() {
+    const pc = form.addressPostcode.trim().replace(/\s+/g, "");
+    if (!pc) return;
+    setPostcodeSearching(true);
+    setPostcodeError("");
+    try {
+      const res = await fetch(`https://api.postcodes.io/postcodes/${encodeURIComponent(pc)}`);
+      const json = await res.json();
+      if (json.status === 200 && json.result) {
+        const r = json.result;
+        const town = r.admin_district || r.parish || r.admin_ward || "";
+        set("addressTown", town);
+        set("addressPostcode", r.postcode);
+      } else {
+        setPostcodeError("Postcode not found. Please check and try again.");
+      }
+    } catch {
+      setPostcodeError("Could not look up postcode. Please enter your address manually.");
+    } finally {
+      setPostcodeSearching(false);
+    }
+  }
+
   async function submit() {
     setSubmitting(true);
-    const { consentAgreed, ...data } = form;
+    const { consentAgreed, addressLine1, addressTown, addressPostcode, ...rest } = form;
+    const address = [addressLine1, addressTown, addressPostcode].filter(Boolean).join("\n");
     await fetch(`/api/intake/${token}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ ...rest, address }),
     });
     setDone(true);
   }
@@ -172,9 +205,40 @@ export function IntakeFormClient({ token, clientName }: Props) {
                 </div>
               </div>
 
-              <div>
+              <div className="space-y-3">
                 <label className={labelCls}>Home address</label>
-                <textarea rows={2} placeholder="Street, city, postcode" value={form.address} onChange={(e) => set("address", e.target.value)} className={textareaCls} />
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Postcode"
+                    value={form.addressPostcode}
+                    onChange={(e) => { set("addressPostcode", e.target.value.toUpperCase()); setPostcodeError(""); }}
+                    className={`${inputCls} uppercase`}
+                  />
+                  <button
+                    type="button"
+                    onClick={lookupPostcode}
+                    disabled={postcodeSearching || !form.addressPostcode.trim()}
+                    className="shrink-0 px-4 py-3 bg-[#3E4F56] text-white text-[12px] tracking-[0.1em] uppercase rounded-md hover:opacity-90 disabled:opacity-40 transition-opacity whitespace-nowrap"
+                  >
+                    {postcodeSearching ? "…" : "Find"}
+                  </button>
+                </div>
+                {postcodeError && <p className="text-[12px] text-red-600">{postcodeError}</p>}
+                <input
+                  type="text"
+                  placeholder="House name or number, street"
+                  value={form.addressLine1}
+                  onChange={(e) => set("addressLine1", e.target.value)}
+                  className={inputCls}
+                />
+                <input
+                  type="text"
+                  placeholder="Town / city"
+                  value={form.addressTown}
+                  onChange={(e) => set("addressTown", e.target.value)}
+                  className={inputCls}
+                />
               </div>
 
               <div className="pt-2 border-t border-[#F5F0E6]">
@@ -185,8 +249,8 @@ export function IntakeFormClient({ token, clientName }: Props) {
                     <input type="text" value={form.emergencyName} onChange={(e) => set("emergencyName", e.target.value)} className={inputCls} />
                   </div>
                   <div>
-                    <label className={labelCls}>Phone</label>
-                    <input type="tel" value={form.emergencyPhone} onChange={(e) => set("emergencyPhone", e.target.value)} className={inputCls} />
+                    <label className={labelCls}>Phone number</label>
+                    <input type="tel" placeholder="e.g. 07700 900000" value={form.emergencyPhone} onChange={(e) => set("emergencyPhone", e.target.value)} className={inputCls} />
                   </div>
                 </div>
               </div>
@@ -237,6 +301,24 @@ export function IntakeFormClient({ token, clientName }: Props) {
                     I am currently pregnant
                   </span>
                 </label>
+              </div>
+
+              <div className="pt-2 border-t border-[#F5F0E6] space-y-4">
+                <p className="text-[11px] tracking-[0.1em] uppercase text-[#A09687]">GP / doctor details</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className={labelCls}>Doctor&rsquo;s name</label>
+                    <input type="text" placeholder="Dr. Smith" value={form.gpName} onChange={(e) => set("gpName", e.target.value)} className={inputCls} />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Surgery phone</label>
+                    <input type="tel" placeholder="e.g. 01772 000000" value={form.gpPhone} onChange={(e) => set("gpPhone", e.target.value)} className={inputCls} />
+                  </div>
+                </div>
+                <div>
+                  <label className={labelCls}>Surgery / practice name</label>
+                  <input type="text" placeholder="e.g. Lostock Hall Medical Centre" value={form.gpPractice} onChange={(e) => set("gpPractice", e.target.value)} className={inputCls} />
+                </div>
               </div>
             </div>
           )}

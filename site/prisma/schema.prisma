@@ -184,6 +184,11 @@ model IntakeForm {
   emergencyName  String @default("")
   emergencyPhone String @default("")
 
+  // GP details
+  gpName     String @default("")
+  gpPractice String @default("")
+  gpPhone    String @default("")
+
   // Health history
   conditions   Json    @default("[]")
   medications  String  @default("") @db.Text
