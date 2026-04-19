@@ -7,6 +7,7 @@ import { StatusBadge } from "@/components/admin/StatusBadge";
 import { ClientEditor } from "@/components/admin/ClientEditor";
 import { ManualBookingForm } from "@/components/admin/ManualBookingForm";
 import { IntakeSection } from "@/components/admin/IntakeSection";
+import { IntakeDetails } from "@/components/admin/IntakeDetails";
 
 export const metadata: Metadata = { title: "Client" };
 export const dynamic = "force-dynamic";
@@ -119,6 +120,11 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
             )}
           </div>
 
+          {/* Intake form details */}
+          {client.intakeForm?.completedAt && (
+            <IntakeDetails intake={JSON.parse(JSON.stringify(client.intakeForm))} />
+          )}
+
           {/* Past bookings */}
           <div className="bg-white rounded-lg shadow-sm p-6">
             <h2 className="text-[11px] tracking-[0.1em] uppercase text-[#A09687] mb-4">
@@ -168,7 +174,8 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
           />
           <IntakeSection
             clientId={client.id}
-            intake={JSON.parse(JSON.stringify(client.intakeForm))}
+            isCompleted={!!client.intakeForm?.completedAt}
+            isSent={!!client.intakeForm}
           />
           <ManualBookingForm
             client={{
