@@ -44,7 +44,7 @@ export function Nav() {
         aria-label="Primary"
       >
         <Link href="/" aria-label="Balance and Wellness, home">
-          <img src="/logo-light.svg" alt="Balance and Wellness" className="h-9 w-auto" />
+          <img src="/logo-light.svg" alt="Balance and Wellness" className="h-14 w-auto" />
         </Link>
 
         <ul className="hidden md:flex items-center gap-9">
