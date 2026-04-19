@@ -126,9 +126,10 @@ export async function POST(request: Request) {
         const resend = new Resend(process.env.RESEND_API_KEY);
         const from = process.env.EMAIL_FROM ?? "Balance & Wellness <hello@balanceandwellness.com>";
         const siteOrigin = process.env.NEXT_PUBLIC_SITE_URL ?? origin;
-        const confirmedCount = await db.booking.count({
-          where: { email: data.email, status: { in: ["CONFIRMED", "COMPLETED"] } },
-        });
+        const [confirmedCount, clientRecord] = await Promise.all([
+          db.booking.count({ where: { email: data.email, status: { in: ["CONFIRMED", "COMPLETED"] } } }),
+          db.client.findUnique({ where: { email: data.email }, select: { portalToken: true } }),
+        ]);
         const { createElement } = await import("react");
         await resend.emails.send({
           from,
@@ -146,6 +147,7 @@ export async function POST(request: Request) {
             studioAddress: siteContent.studio.addressLines.join("\n"),
             studioPhone: siteContent.studio.phone,
             cancelUrl: `${siteOrigin}/cancel/${booking.cancelToken}`,
+            portalUrl: clientRecord?.portalToken ? `${siteOrigin}/my-booking/${clientRecord.portalToken}` : undefined,
             confirmedBookingCount: confirmedCount,
             isRegular,
           }),

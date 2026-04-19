@@ -155,6 +155,7 @@ export async function POST(request: Request) {
           studioAddress: siteContent.studio.addressLines.join("\n"),
           studioPhone: siteContent.studio.phone,
           cancelUrl: `${siteOrigin}/cancel/${booking.cancelToken}`,
+          portalUrl: client?.portalToken ? `${siteOrigin}/my-booking/${client.portalToken}` : undefined,
           confirmedBookingCount: confirmedCount,
           isRegular,
         }),

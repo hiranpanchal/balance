@@ -25,6 +25,7 @@ interface BookingConfirmationProps {
   studioAddress: string;
   studioPhone: string;
   cancelUrl?: string;
+  portalUrl?: string;
   confirmedBookingCount?: number;
   isRegular?: boolean;
 }
@@ -41,6 +42,7 @@ export function BookingConfirmation({
   studioAddress,
   studioPhone,
   cancelUrl,
+  portalUrl,
   confirmedBookingCount,
   isRegular,
 }: BookingConfirmationProps) {
@@ -132,9 +134,14 @@ export function BookingConfirmation({
             Call or message us at least 24 hours before: {studioPhone}. Changes inside 24 hours are charged at 50%.
           </Text>
 
-          {cancelUrl && (
+          {(cancelUrl || portalUrl) && (
             <Text style={text}>
-              <a href={cancelUrl} style={{ color: "#A09687" }}>Cancel this booking</a>
+              {portalUrl && (
+                <><a href={portalUrl} style={{ color: "#A09687" }}>View your bookings</a>{cancelUrl ? " · " : ""}</>
+              )}
+              {cancelUrl && (
+                <a href={cancelUrl} style={{ color: "#A09687" }}>Cancel this booking</a>
+              )}
             </Text>
           )}
 

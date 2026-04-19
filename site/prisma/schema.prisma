@@ -182,16 +182,17 @@ enum ClientGrade {
 }
 
 model Client {
-  id         String      @id @default(cuid())
-  firstName  String
-  lastName   String
-  email      String      @unique
-  phone      String      @default("")
-  notes      String      @default("") @db.Text
-  grade      ClientGrade @default(NEW)
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  intakeForm IntakeForm?
+  id          String      @id @default(cuid())
+  firstName   String
+  lastName    String
+  email       String      @unique
+  phone       String      @default("")
+  notes       String      @default("") @db.Text
+  grade       ClientGrade @default(NEW)
+  portalToken String      @unique @default(cuid())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  intakeForm  IntakeForm?
 }
 
 model IntakeForm {
