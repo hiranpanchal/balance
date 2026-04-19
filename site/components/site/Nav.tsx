@@ -43,17 +43,8 @@ export function Nav() {
         }`}
         aria-label="Primary"
       >
-        <Link
-          href="/"
-          aria-label="Balance and Wellness, home"
-          className="flex items-baseline"
-        >
-          <span className="font-display text-[26px] leading-none text-teal">
-            Balance
-          </span>
-          <span className="font-script text-[20px] ml-2 text-gold">
-            and Wellness
-          </span>
+        <Link href="/" aria-label="Balance and Wellness, home">
+          <img src="/logo-light.svg" alt="Balance and Wellness" className="h-9 w-auto" />
         </Link>
 
         <ul className="hidden md:flex items-center gap-9">

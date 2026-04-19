@@ -8,11 +8,8 @@ export function Footer() {
     <footer className="pt-20 pb-10 px-6 md:px-12 bg-teal-deep text-cream mt-24">
       <div className="max-w-[1280px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
         <div>
-          <Link href="/" className="flex items-baseline">
-            <span className="font-display text-[28px] text-cream">Balance</span>
-            <span className="font-script text-[20px] ml-2 text-gold">
-              and Wellness
-            </span>
+          <Link href="/" aria-label="Balance and Wellness, home">
+            <img src="/logo-dark.svg" alt="Balance and Wellness" className="h-10 w-auto" />
           </Link>
           <p className="mt-5 text-[13px] leading-[22px] opacity-70 max-w-[240px]">
             A boutique massage studio in the heart of Bristol.
