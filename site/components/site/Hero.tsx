@@ -6,7 +6,12 @@ import { GoldRule } from "./GoldRule";
 const HERO_IMAGE =
   "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=2400&q=80";
 
-export function Hero() {
+interface HeroProps {
+  headline?: string;
+  subheadline?: string;
+}
+
+export function Hero({ headline, subheadline }: HeroProps = {}) {
   return (
     <section className="relative w-full h-[88vh] min-h-[620px] flex items-center justify-center overflow-hidden">
       <Image
@@ -42,11 +47,10 @@ export function Hero() {
           <GoldRule width="w-10" />
         </div>
         <h1 className="font-display mt-6 leading-[1.05] text-[54px] md:text-[78px] text-cream">
-          A quiet hour, well kept.
+          {headline ?? "A quiet hour, well kept."}
         </h1>
         <p className="mt-8 text-[17px] md:text-[19px] leading-[30px] max-w-[560px] mx-auto text-cream/90">
-          Boutique massage and bodywork, delivered with unhurried attention.
-          Open Tuesday through Saturday.
+          {subheadline ?? "Boutique massage and bodywork, delivered with unhurried attention. Open Tuesday through Saturday."}
         </p>
         <div className="mt-10 flex items-center justify-center gap-6 flex-wrap">
           <Button href="/book" variant="primary">

@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Eyebrow } from "@/components/site/Eyebrow";
 import { GoldRule } from "@/components/site/GoldRule";
-import { studio } from "@/lib/data";
+import { getSiteContent } from "@/lib/content";
 import { ContactForm } from "./ContactForm";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -10,7 +12,8 @@ export const metadata: Metadata = {
     "Get in touch with Balance and Wellness. Studio address, opening hours, phone, email, and a contact form.",
 };
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const { studio } = await getSiteContent();
   return (
     <>
       <section className="pt-24 md:pt-32 pb-12 px-6 md:px-12">

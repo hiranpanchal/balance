@@ -6,7 +6,10 @@ import { Button } from "@/components/site/Button";
 import { ServiceCard } from "@/components/site/ServiceCard";
 import { JournalCard } from "@/components/site/JournalCard";
 import { ImgPlaceholder } from "@/components/site/ImgPlaceholder";
-import { services, journalPosts, studio, featuredServiceIds } from "@/lib/data";
+import { services, journalPosts, featuredServiceIds } from "@/lib/data";
+import { getSiteContent } from "@/lib/content";
+
+export const dynamic = "force-dynamic";
 
 const approach = [
   {
@@ -27,12 +30,14 @@ const featuredServices = featuredServiceIds
   .map((id) => services.find((s) => s.id === id))
   .filter((s): s is (typeof services)[number] => Boolean(s));
 
-export default function HomePage() {
+export default async function HomePage() {
+  const content = await getSiteContent();
+  const { studio } = content;
   const latestPosts = journalPosts.slice(0, 2);
 
   return (
     <>
-      <Hero />
+      <Hero headline={content.hero.headline} subheadline={content.hero.subheadline} />
 
       {/* Approach */}
       <section className="py-28 md:py-32 px-6 md:px-12">
