@@ -12,11 +12,16 @@ import { getSiteContent } from "@/lib/content";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Balance and Wellness — boutique massage & bodywork",
-  description:
-    "Boutique massage and bodywork by clinical aromatherapist Mukti Panchal. Seven treatments, one guest at a time, in Lostock Hall.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { getPageDescription } = await import("@/lib/content");
+  return {
+    title: "Balance and Wellness — boutique massage & bodywork",
+    description: await getPageDescription(
+      "page.home.description",
+      "Boutique massage and bodywork by clinical aromatherapist Mukti Panchal. Seven treatments, one guest at a time, in Lostock Hall."
+    ),
+  };
+}
 
 const approach = [
   {

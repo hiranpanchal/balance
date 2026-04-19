@@ -1,6 +1,16 @@
 import { db } from "./db";
 import { studio as defaultStudio } from "./data";
 
+export async function getPageDescription(key: string, fallback: string): Promise<string> {
+  const row = await db.content.findUnique({ where: { key } });
+  return row?.value?.trim() || fallback;
+}
+
+export async function getGoogleVerification(): Promise<string | null> {
+  const row = await db.content.findUnique({ where: { key: "seo.googleVerification" } });
+  return row?.value?.trim() || null;
+}
+
 export async function getSiteContent() {
   const rows = await db.content.findMany();
   const kv: Record<string, string> = {};

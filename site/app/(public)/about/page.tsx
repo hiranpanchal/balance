@@ -4,12 +4,17 @@ import { GoldRule } from "@/components/site/GoldRule";
 import { Button } from "@/components/site/Button";
 import { ImgPlaceholder } from "@/components/site/ImgPlaceholder";
 import { therapist, values } from "@/lib/data";
+import { getPageDescription } from "@/lib/content";
 
-export const metadata: Metadata = {
-  title: "About",
-  description:
-    "Meet Mukti Panchal — fully qualified clinical aromatherapist and massage therapist. Boutique studio in Lostock Hall, one guest at a time.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "About",
+    description: await getPageDescription(
+      "page.about.description",
+      "Meet Mukti Panchal — fully qualified clinical aromatherapist and massage therapist. Boutique studio in Lostock Hall, one guest at a time."
+    ),
+  };
+}
 
 const GALLERY = [
   {

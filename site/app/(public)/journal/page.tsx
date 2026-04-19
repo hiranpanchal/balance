@@ -3,12 +3,17 @@ import { Eyebrow } from "@/components/site/Eyebrow";
 import { GoldRule } from "@/components/site/GoldRule";
 import { JournalCard } from "@/components/site/JournalCard";
 import { journalPosts } from "@/lib/data";
+import { getPageDescription } from "@/lib/content";
 
-export const metadata: Metadata = {
-  title: "Journal",
-  description:
-    "Notes from the studio — short essays on stillness, sleep, ritual, and the craft of bodywork.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Journal",
+    description: await getPageDescription(
+      "page.journal.description",
+      "Notes from the studio — short essays on stillness, sleep, ritual, and the craft of bodywork."
+    ),
+  };
+}
 
 export default function JournalPage() {
   return (

@@ -4,12 +4,17 @@ import { GoldRule } from "@/components/site/GoldRule";
 import { Button } from "@/components/site/Button";
 import { ImgPlaceholder } from "@/components/site/ImgPlaceholder";
 import { voucherAmounts } from "@/lib/data";
+import { getPageDescription } from "@/lib/content";
 
-export const metadata: Metadata = {
-  title: "Gift vouchers",
-  description:
-    "A quiet hour, given. Balance and Wellness gift vouchers from £75, delivered by email or post.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Gift vouchers",
+    description: await getPageDescription(
+      "page.giftvouchers.description",
+      "A quiet hour, given. Balance and Wellness gift vouchers from £75, delivered by email or post."
+    ),
+  };
+}
 
 export default function VouchersPage() {
   return (

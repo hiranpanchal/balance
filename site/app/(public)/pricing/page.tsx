@@ -4,12 +4,17 @@ import { Eyebrow } from "@/components/site/Eyebrow";
 import { GoldRule } from "@/components/site/GoldRule";
 import { Button } from "@/components/site/Button";
 import { services, faq } from "@/lib/data";
+import { getPageDescription } from "@/lib/content";
 
-export const metadata: Metadata = {
-  title: "Pricing",
-  description:
-    "Quiet, steady pricing across all seven treatments. No add-ons, no upsells. From £35.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Pricing",
+    description: await getPageDescription(
+      "page.pricing.description",
+      "Quiet, steady pricing across all seven treatments. No add-ons, no upsells. From £35."
+    ),
+  };
+}
 
 export default function PricingPage() {
   return (

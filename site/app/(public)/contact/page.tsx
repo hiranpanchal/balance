@@ -1,16 +1,20 @@
 import type { Metadata } from "next";
 import { Eyebrow } from "@/components/site/Eyebrow";
 import { GoldRule } from "@/components/site/GoldRule";
-import { getSiteContent } from "@/lib/content";
+import { getSiteContent, getPageDescription } from "@/lib/content";
 import { ContactForm } from "./ContactForm";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Contact",
-  description:
-    "Get in touch with Balance and Wellness. Studio address, opening hours, phone, email, and a contact form.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Contact",
+    description: await getPageDescription(
+      "page.contact.description",
+      "Get in touch with Balance and Wellness. Studio address, opening hours, phone, email, and a contact form."
+    ),
+  };
+}
 
 export default async function ContactPage() {
   const { studio } = await getSiteContent();

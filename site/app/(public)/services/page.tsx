@@ -5,12 +5,17 @@ import { GoldRule } from "@/components/site/GoldRule";
 import { Button } from "@/components/site/Button";
 import { ImgPlaceholder } from "@/components/site/ImgPlaceholder";
 import { services } from "@/lib/data";
+import { getPageDescription } from "@/lib/content";
 
-export const metadata: Metadata = {
-  title: "Treatments",
-  description:
-    "Seven boutique massage and bodywork treatments — from a signature Balance session to Hot Stones. One therapist, one guest at a time.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Treatments",
+    description: await getPageDescription(
+      "page.services.description",
+      "Seven boutique massage and bodywork treatments — from a signature Balance session to Hot Stones. One therapist, one guest at a time."
+    ),
+  };
+}
 
 export default function ServicesPage() {
   return (
