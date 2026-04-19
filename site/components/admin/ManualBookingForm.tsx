@@ -1,0 +1,199 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { services } from "@/lib/data";
+
+interface Props {
+  client: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+  };
+}
+
+const times = [
+  "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
+  "12:00", "12:30", "13:00", "13:30", "14:00", "14:30",
+  "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30",
+];
+
+export function ManualBookingForm({ client }: Props) {
+  const router = useRouter();
+  const [serviceId, setServiceId] = useState(services[0].id);
+  const [duration, setDuration] = useState(services[0].durations[0].mins);
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("10:00");
+  const [price, setPrice] = useState(services[0].durations[0].price);
+  const [notes, setNotes] = useState("");
+  const [status, setStatus] = useState("CONFIRMED");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const selectedService = services.find((s) => s.id === serviceId)!;
+
+  function handleServiceChange(id: string) {
+    const svc = services.find((s) => s.id === id)!;
+    setServiceId(id);
+    setDuration(svc.durations[0].mins);
+    setPrice(svc.durations[0].price);
+  }
+
+  function handleDurationChange(mins: number) {
+    setDuration(mins);
+    const d = selectedService.durations.find((d) => d.mins === mins);
+    if (d) setPrice(d.price);
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!date) { setError("Please select a date."); return; }
+    setSaving(true);
+    setError("");
+
+    const res = await fetch("/api/admin/bookings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        firstName: client.firstName,
+        lastName: client.lastName,
+        email: client.email,
+        phone: client.phone,
+        service: serviceId,
+        duration,
+        date,
+        time,
+        price,
+        notes,
+        status,
+      }),
+    });
+
+    if (!res.ok) {
+      setError("Failed to create booking. Please try again.");
+      setSaving(false);
+      return;
+    }
+
+    router.refresh();
+    setSaving(false);
+    setDate("");
+    setNotes("");
+    setError("");
+  }
+
+  const inputClass =
+    "w-full border border-[#3E4F56]/20 rounded px-3 py-2 text-[13px] text-[#3E4F56] bg-[#F5F0E6] focus:outline-none focus:border-[#B28B5D]";
+  const labelClass = "block text-[11px] tracking-[0.1em] uppercase text-[#A09687] mb-1.5";
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm p-6">
+      <h2 className="text-[11px] tracking-[0.1em] uppercase text-[#A09687] mb-5">
+        Add booking
+      </h2>
+
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-[12px] text-red-700">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className={labelClass}>Treatment</label>
+          <select
+            value={serviceId}
+            onChange={(e) => handleServiceChange(e.target.value)}
+            className={inputClass}
+          >
+            {services.map((s) => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className={labelClass}>Duration</label>
+            <select
+              value={duration}
+              onChange={(e) => handleDurationChange(Number(e.target.value))}
+              className={inputClass}
+            >
+              {selectedService.durations.map((d) => (
+                <option key={d.mins} value={d.mins}>{d.mins} min</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className={labelClass}>Price (£)</label>
+            <input
+              type="number"
+              value={price}
+              onChange={(e) => setPrice(Number(e.target.value))}
+              className={inputClass}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className={labelClass}>Date</label>
+            <input
+              type="date"
+              required
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className={labelClass}>Time</label>
+            <select
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className={inputClass}
+            >
+              {times.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label className={labelClass}>Status</label>
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className={inputClass}
+          >
+            <option value="CONFIRMED">Confirmed</option>
+            <option value="PENDING">Pending</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="CANCELLED">Cancelled</option>
+          </select>
+        </div>
+
+        <div>
+          <label className={labelClass}>Notes</label>
+          <textarea
+            rows={3}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            className={`${inputClass} resize-none leading-[22px]`}
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={saving}
+          className="w-full py-2.5 bg-[#3E4F56] text-white text-[12px] tracking-[0.1em] uppercase rounded hover:opacity-90 disabled:opacity-50"
+        >
+          {saving ? "Saving…" : "Add booking"}
+        </button>
+      </form>
+    </div>
+  );
+}

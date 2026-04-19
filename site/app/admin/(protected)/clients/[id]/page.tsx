@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { services } from "@/lib/data";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { ClientEditor } from "@/components/admin/ClientEditor";
+import { ManualBookingForm } from "@/components/admin/ManualBookingForm";
 
 export const metadata: Metadata = { title: "Client" };
 export const dynamic = "force-dynamic";
@@ -154,12 +155,22 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
           </div>
         </div>
 
-        {/* Right column — phone + notes */}
-        <ClientEditor
-          clientId={client.id}
-          initialNotes={client.notes}
-          initialPhone={client.phone}
-        />
+        {/* Right column — phone, notes, manual booking */}
+        <div className="space-y-6">
+          <ClientEditor
+            clientId={client.id}
+            initialNotes={client.notes}
+            initialPhone={client.phone}
+          />
+          <ManualBookingForm
+            client={{
+              firstName: client.firstName,
+              lastName: client.lastName,
+              email: client.email,
+              phone: client.phone,
+            }}
+          />
+        </div>
       </div>
     </div>
   );
