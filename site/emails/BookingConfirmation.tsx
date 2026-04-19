@@ -24,6 +24,9 @@ interface BookingConfirmationProps {
   isFirstTime: boolean;
   studioAddress: string;
   studioPhone: string;
+  cancelUrl?: string;
+  confirmedBookingCount?: number;
+  isRegular?: boolean;
 }
 
 export function BookingConfirmation({
@@ -37,6 +40,9 @@ export function BookingConfirmation({
   isFirstTime,
   studioAddress,
   studioPhone,
+  cancelUrl,
+  confirmedBookingCount,
+  isRegular,
 }: BookingConfirmationProps) {
   const formattedDate = new Date(date + "T00:00:00").toLocaleDateString("en-GB", {
     weekday: "long",
@@ -99,12 +105,38 @@ export function BookingConfirmation({
             {studioAddress.replace(/\n/g, ", ")}
           </Text>
 
+          {!isRegular && confirmedBookingCount !== undefined && confirmedBookingCount < 5 && (
+            <Section style={loyaltyBox}>
+              <Text style={loyaltyText}>
+                <strong>Your progress to Regular status</strong>
+                <br />
+                {confirmedBookingCount} of 5 sessions complete — {5 - confirmedBookingCount} more to go. Regular customers pay a 50% deposit instead of full price.
+              </Text>
+              <Text style={loyaltyBar}>
+                {"▓".repeat(confirmedBookingCount)}{"░".repeat(5 - confirmedBookingCount)} {confirmedBookingCount}/5
+              </Text>
+            </Section>
+          )}
+
+          {isRegular && (
+            <Section style={loyaltyBox}>
+              <Text style={loyaltyText}>
+                <strong>Regular customer</strong> — your 50% deposit benefit is active on all future bookings. Thank you for being a loyal guest.
+              </Text>
+            </Section>
+          )}
+
           <Text style={text}>
             <strong>Need to change anything?</strong>
             <br />
-            Call or message us at least 24 hours before: {studioPhone}. Changes
-            inside 24 hours are charged at 50%.
+            Call or message us at least 24 hours before: {studioPhone}. Changes inside 24 hours are charged at 50%.
           </Text>
+
+          {cancelUrl && (
+            <Text style={text}>
+              <a href={cancelUrl} style={{ color: "#A09687" }}>Cancel this booking</a>
+            </Text>
+          )}
 
           <Hr style={hr} />
           <Text style={footer}>
@@ -146,3 +178,6 @@ const calloutText = { color: "#3E4F56", fontSize: "14px", lineHeight: "22px", ma
 const hr = { borderColor: "#B28B5D", margin: "24px 0" };
 const text = { color: "#3E4F56", fontSize: "14px", lineHeight: "22px", marginBottom: "16px" };
 const footer = { color: "#A09687", fontSize: "12px" };
+const loyaltyBox = { backgroundColor: "#F5F0E6", padding: "16px 20px", borderRadius: "4px", marginBottom: "24px" };
+const loyaltyText = { color: "#3E4F56", fontSize: "13px", lineHeight: "22px", margin: "0 0 8px 0" };
+const loyaltyBar = { color: "#B28B5D", fontSize: "14px", fontFamily: "monospace", margin: 0 };

@@ -16,9 +16,8 @@ interface BookingCancellationProps {
   serviceName: string;
   date: string;
   time: string;
-  reason?: string;
+  lateCancel?: boolean;
   studioPhone: string;
-  studioEmail: string;
 }
 
 export function BookingCancellation({
@@ -27,9 +26,8 @@ export function BookingCancellation({
   serviceName,
   date,
   time,
-  reason,
+  lateCancel,
   studioPhone,
-  studioEmail,
 }: BookingCancellationProps) {
   const formattedDate = new Date(date + "T00:00:00").toLocaleDateString("en-GB", {
     weekday: "long",
@@ -46,26 +44,22 @@ export function BookingCancellation({
         <Container style={container}>
           <Heading style={heading}>Balance &amp; Wellness</Heading>
           <Text style={text}>
-            Hi {firstName},
+            Hi {firstName}, your {serviceName} session on {formattedDate} at {time} (ref: {ref}) has been cancelled.
           </Text>
-          <Text style={text}>
-            Your {serviceName} session on {formattedDate} at {time} (ref:{" "}
-            {ref}) has been cancelled.
-          </Text>
-          {reason && (
+          {lateCancel ? (
+            <Text style={warning}>
+              This cancellation was made within 24 hours of your appointment. A 50% late cancellation charge may apply. If you have any questions, please call {studioPhone}.
+            </Text>
+          ) : (
             <Text style={text}>
-              <strong>Reason:</strong> {reason}
+              No charge applies. We hope to see you again soon &mdash; rebook any time at your convenience.
             </Text>
           )}
           <Text style={text}>
-            To rebook, please call {studioPhone} or email{" "}
-            <a href={`mailto:${studioEmail}`} style={{ color: "#B28B5D" }}>
-              {studioEmail}
-            </a>
-            . We&rsquo;d love to find you another time that works.
+            To rebook, call or message us on {studioPhone}.
           </Text>
           <Hr style={hr} />
-          <Text style={footer}>Balance &amp; Wellness &mdash; Bristol</Text>
+          <Text style={footer}>Balance &amp; Wellness &mdash; {studioPhone}</Text>
         </Container>
       </Body>
     </Html>
@@ -84,5 +78,14 @@ const container = {
 };
 const heading = { color: "#3E4F56", fontSize: "22px", fontWeight: "400", marginBottom: "20px" };
 const text = { color: "#3E4F56", fontSize: "15px", lineHeight: "26px", marginBottom: "16px" };
+const warning = {
+  color: "#3E4F56",
+  fontSize: "15px",
+  lineHeight: "26px",
+  backgroundColor: "#fff8ee",
+  borderLeft: "3px solid #B28B5D",
+  padding: "14px 18px",
+  marginBottom: "16px",
+};
 const hr = { borderColor: "#B28B5D", margin: "24px 0" };
 const footer = { color: "#A09687", fontSize: "12px" };

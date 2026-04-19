@@ -7,6 +7,13 @@ import { db } from "@/lib/db";
 import { getService } from "@/lib/getServices";
 import { getSiteContent } from "@/lib/content";
 
+function generateVoucherCode(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let s = "GV-";
+  for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  return s;
+}
+
 export async function POST(request: Request) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
     apiVersion: "2026-03-25.dahlia",
@@ -24,6 +31,67 @@ export async function POST(request: Request) {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
+
+    // ── Gift voucher purchase ──────────────────────────────────────────────
+    if (session.metadata?.type === "gift_voucher") {
+      const { voucherId, purchaserName, recipientName, recipientEmail, message } = session.metadata;
+      if (voucherId) {
+        try {
+          const code = generateVoucherCode();
+          const voucher = await db.voucher.update({
+            where: { id: voucherId },
+            data: { paid: true, code },
+          });
+
+          const [{ Resend }, { VoucherEmail }] = await Promise.all([
+            import("resend"),
+            import("@/emails/VoucherEmail"),
+          ]);
+          const resend = new Resend(process.env.RESEND_API_KEY);
+          const from = process.env.EMAIL_FROM ?? "Balance & Wellness <hello@balanceandwellness.com>";
+          const amountGbp = voucher.amountPence / 100;
+          const expiresAt = voucher.expiresAt.toISOString();
+
+          // Email purchaser
+          await resend.emails.send({
+            from,
+            to: voucher.purchaserEmail,
+            subject: `Your Balance & Wellness gift voucher — £${amountGbp}`,
+            react: createElement(VoucherEmail, {
+              purchaserName,
+              recipientName: recipientName || undefined,
+              code,
+              amountGbp,
+              expiresAt,
+              message: message || undefined,
+              isGift: false,
+            }),
+          });
+
+          // Email recipient if different address provided
+          if (recipientEmail && recipientEmail !== voucher.purchaserEmail) {
+            await resend.emails.send({
+              from,
+              to: recipientEmail,
+              subject: `You have a Balance & Wellness gift voucher — £${amountGbp}`,
+              react: createElement(VoucherEmail, {
+                purchaserName,
+                recipientName: recipientName || undefined,
+                code,
+                amountGbp,
+                expiresAt,
+                message: message || undefined,
+                isGift: true,
+              }),
+            });
+          }
+        } catch (err) {
+          console.error("Gift voucher post-payment error:", err);
+        }
+      }
+      return NextResponse.json({ received: true });
+    }
+
     const { bookingId, ref } = session.metadata ?? {};
 
     if (!bookingId) return new Response("No bookingId in metadata", { status: 400 });
@@ -34,15 +102,27 @@ export async function POST(request: Request) {
       data: { status: "CONFIRMED", depositPaid: true },
     });
 
-    // Auto-upgrade to REGULAR after 5 confirmed/completed bookings
-    const client = await db.client.findUnique({ where: { email: booking.email } });
-    if (client && client.grade === "NEW") {
-      const confirmedCount = await db.booking.count({
+    // Mark voucher as redeemed if one was applied
+    if (session.metadata?.voucherCode) {
+      await db.voucher.updateMany({
+        where: { code: session.metadata.voucherCode, paid: true, redeemedAt: null },
+        data: { redeemedAt: new Date(), redeemedBookingRef: booking.ref },
+      }).catch(() => {});
+    }
+
+    // Count confirmed bookings and load client (shared by auto-upgrade + email)
+    const [confirmedCount, client] = await Promise.all([
+      db.booking.count({
         where: { email: booking.email, status: { in: ["CONFIRMED", "COMPLETED"] } },
-      });
-      if (confirmedCount >= 5) {
-        await db.client.update({ where: { id: client.id }, data: { grade: "REGULAR" } });
-      }
+      }),
+      db.client.findUnique({ where: { email: booking.email } }),
+    ]);
+
+    // Auto-upgrade to REGULAR after 5 confirmed/completed bookings
+    let isRegular = client?.grade === "REGULAR";
+    if (client && client.grade === "NEW" && confirmedCount >= 5) {
+      await db.client.update({ where: { id: client.id }, data: { grade: "REGULAR" } });
+      isRegular = true;
     }
 
     // Send confirmation email (non-blocking)
@@ -57,6 +137,7 @@ export async function POST(request: Request) {
       const resend = new Resend(process.env.RESEND_API_KEY);
       const from = process.env.EMAIL_FROM ?? "Balance & Wellness <hello@balanceandwellness.com>";
       const serviceName = svc?.name ?? booking.service;
+      const siteOrigin = process.env.NEXT_PUBLIC_SITE_URL ?? "https://balanceandwellness.vercel.app";
 
       await resend.emails.send({
         from,
@@ -73,6 +154,9 @@ export async function POST(request: Request) {
           isFirstTime: booking.firstTime,
           studioAddress: siteContent.studio.addressLines.join("\n"),
           studioPhone: siteContent.studio.phone,
+          cancelUrl: `${siteOrigin}/cancel/${booking.cancelToken}`,
+          confirmedBookingCount: confirmedCount,
+          isRegular,
         }),
       });
 

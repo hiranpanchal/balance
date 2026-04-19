@@ -14,6 +14,7 @@ import {
   Star,
   Users,
   FileText,
+  Gift,
 } from "lucide-react";
 
 const navItems = [
@@ -22,6 +23,7 @@ const navItems = [
   { href: "/admin/calendar", label: "Calendar", icon: Calendar },
   { href: "/admin/services", label: "Services", icon: Layers },
   { href: "/admin/availability", label: "Availability", icon: Calendar },
+  { href: "/admin/vouchers", label: "Vouchers", icon: Gift },
   { href: "/admin/reviews", label: "Reviews", icon: Star },
   { href: "/admin/content", label: "Content", icon: Settings },
   { href: "/admin/about", label: "About", icon: FileText },

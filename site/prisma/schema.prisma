@@ -73,6 +73,7 @@ model Booking {
   stripeSessionId  String?       @unique
   depositAmount    Int           @default(0)
   depositPaid      Boolean       @default(false)
+  cancelToken      String        @unique @default(cuid())
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
 }
@@ -145,6 +146,23 @@ model Image {
   filename  String
   size      Int
   createdAt DateTime @default(now())
+}
+
+model Voucher {
+  id                 String    @id @default(cuid())
+  code               String    @unique
+  amountPence        Int
+  purchaserName      String
+  purchaserEmail     String
+  recipientName      String    @default("")
+  recipientEmail     String    @default("")
+  message            String    @default("") @db.Text
+  stripeSessionId    String?   @unique
+  paid               Boolean   @default(false)
+  redeemedAt         DateTime?
+  redeemedBookingRef String?
+  expiresAt          DateTime
+  createdAt          DateTime  @default(now())
 }
 
 model Review {

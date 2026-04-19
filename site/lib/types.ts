@@ -56,9 +56,11 @@ export interface BookingSelection {
   firstTime?: boolean;
   notes?: string;
   consent?: boolean;
+  voucherCode?: string;
+  voucherDiscountPence?: number;
 }
 
-export interface ConfirmedBooking extends Required<Omit<BookingSelection, "notes" | "firstTime">> {
+export interface ConfirmedBooking extends Required<Omit<BookingSelection, "notes" | "firstTime" | "voucherCode" | "voucherDiscountPence">> {
   id: string;
   firstTime: boolean;
   notes: string;

@@ -126,6 +126,7 @@ export function BookingWizard({ services }: { services: Service[] }) {
           notes: selection.notes ?? "",
           consent: selection.consent ?? false,
           price,
+          ...(selection.voucherCode ? { voucherCode: selection.voucherCode } : {}),
         }),
       });
 
@@ -134,8 +135,13 @@ export function BookingWizard({ services }: { services: Service[] }) {
         throw new Error(json.error ?? "Something went wrong. Please try again.");
       }
 
-      const { url } = await res.json();
-      window.location.href = url;
+      const { url, ref: confirmedRef } = await res.json();
+      if (url) {
+        window.location.href = url;
+      } else {
+        // Voucher covered full amount — confirmed without Stripe
+        router.push(`/book/success?ref=${confirmedRef}`);
+      }
     } catch (err) {
       setConfirmError(err instanceof Error ? err.message : "Something went wrong.");
       setConfirming(false);
@@ -205,6 +211,7 @@ export function BookingWizard({ services }: { services: Service[] }) {
           <StepConfirm
             services={services}
             selection={selection}
+            update={update}
             onConfirm={handleConfirm}
             edit={(targetStep) => setStep(targetStep)}
             confirming={confirming}

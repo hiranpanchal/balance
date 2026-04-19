@@ -46,10 +46,14 @@ export async function PATCH(
       const { Resend } = await import("resend");
       const { createElement } = await import("react");
       const { BookingCancellation } = await import("@/emails/BookingCancellation");
-      const { services } = await import("@/lib/data");
+      const [{ services }, { getSiteContent }] = await Promise.all([
+        import("@/lib/data"),
+        import("@/lib/content"),
+      ]);
 
       const resend = new Resend(process.env.RESEND_API_KEY);
       const serviceName = services.find((s) => s.id === booking.service)?.name ?? booking.service;
+      const siteContent = await getSiteContent();
 
       await resend.emails.send({
         from: process.env.EMAIL_FROM ?? "Balance & Wellness <hello@balanceandwellness.com>",
@@ -61,8 +65,7 @@ export async function PATCH(
           serviceName,
           date: booking.date,
           time: booking.time,
-          studioPhone: "+44 117 496 2250",
-          studioEmail: "hello@balanceandwellness.com",
+          studioPhone: siteContent.studio.phone,
         }),
       });
     } catch (emailErr) {

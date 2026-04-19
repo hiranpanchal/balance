@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Eyebrow } from "@/components/site/Eyebrow";
 import { Button } from "@/components/site/Button";
 import { GoldRule } from "@/components/site/GoldRule";
@@ -9,6 +10,7 @@ import type { BookingSelection, Service } from "@/lib/types";
 export function StepConfirm({
   services,
   selection,
+  update,
   onConfirm,
   edit,
   confirming,
@@ -16,16 +18,56 @@ export function StepConfirm({
 }: {
   services: Service[];
   selection: BookingSelection;
+  update: (patch: Partial<BookingSelection>) => void;
   onConfirm: () => void;
   edit: (step: number) => void;
   confirming?: boolean;
   confirmError?: string;
 }) {
+  const [voucherInput, setVoucherInput] = useState(selection.voucherCode ?? "");
+  const [voucherStatus, setVoucherStatus] = useState<"idle" | "checking" | "valid" | "invalid">(
+    selection.voucherCode ? "valid" : "idle"
+  );
+  const [voucherError, setVoucherError] = useState("");
+
   const svc = services.find((s) => s.id === selection.treatment);
   const price =
     selection.treatment && selection.duration
       ? (svc?.durations.find((d) => d.mins === selection.duration)?.price ?? null)
       : null;
+
+  const discount = (selection.voucherDiscountPence ?? 0) / 100;
+  const chargeable = price !== null ? Math.max(0, price - discount) : null;
+
+  async function applyVoucher() {
+    const code = voucherInput.trim().toUpperCase();
+    if (!code) return;
+    setVoucherStatus("checking");
+    setVoucherError("");
+    try {
+      const res = await fetch(`/api/voucher/validate?code=${encodeURIComponent(code)}`);
+      const json = await res.json();
+      if (json.valid) {
+        const discountPence = price !== null ? Math.min(json.amountPence, price * 100) : json.amountPence;
+        update({ voucherCode: code, voucherDiscountPence: discountPence });
+        setVoucherStatus("valid");
+      } else {
+        setVoucherError(json.error ?? "Invalid voucher code");
+        setVoucherStatus("invalid");
+        update({ voucherCode: undefined, voucherDiscountPence: undefined });
+      }
+    } catch {
+      setVoucherError("Could not check voucher. Please try again.");
+      setVoucherStatus("invalid");
+    }
+  }
+
+  function removeVoucher() {
+    setVoucherInput("");
+    setVoucherStatus("idle");
+    setVoucherError("");
+    update({ voucherCode: undefined, voucherDiscountPence: undefined });
+  }
 
   const dateLabel =
     selection.date &&
@@ -75,12 +117,59 @@ export function StepConfirm({
           <Row label="Notes" value={selection.notes} onEdit={() => edit(3)} />
         )}
 
+        {discount > 0 && (
+          <div className="flex items-center justify-between py-3 border-b border-teal/10 text-[13px]">
+            <span className="text-gold">Voucher ({selection.voucherCode})</span>
+            <span className="text-gold">−£{discount}</span>
+          </div>
+        )}
         <div className="flex items-center justify-between py-4 mt-2 border-t border-teal/20">
-          <span className="font-display text-[20px] text-teal">Total</span>
+          <span className="font-display text-[20px] text-teal">
+            {chargeable === 0 ? "Fully covered" : "To pay now"}
+          </span>
           <span className="font-display text-[24px] text-teal">
-            {price !== null ? `£${price}` : "—"}
+            {chargeable !== null ? `£${chargeable}` : "—"}
           </span>
         </div>
+      </div>
+
+      {/* Voucher code */}
+      <div className="mt-6 max-w-[820px] mx-auto">
+        {voucherStatus === "valid" ? (
+          <div className="flex items-center justify-between bg-[#f0faf0] border border-green-200 rounded px-4 py-3">
+            <span className="text-[13px] text-green-800">
+              Voucher <strong>{selection.voucherCode}</strong> applied — £{discount} off
+            </span>
+            <button
+              type="button"
+              onClick={removeVoucher}
+              className="text-[11px] tracking-[0.12em] uppercase text-green-700 hover:text-green-900"
+            >
+              Remove
+            </button>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Gift voucher code"
+              value={voucherInput}
+              onChange={(e) => setVoucherInput(e.target.value.toUpperCase())}
+              className="flex-1 border border-teal/20 rounded px-4 py-2.5 text-[13px] text-teal placeholder:text-teal/40 focus:outline-none focus:border-gold"
+            />
+            <button
+              type="button"
+              onClick={applyVoucher}
+              disabled={!voucherInput.trim() || voucherStatus === "checking"}
+              className="px-5 py-2.5 border border-teal/30 text-teal text-[11px] tracking-[0.12em] uppercase rounded hover:border-gold disabled:opacity-40"
+            >
+              {voucherStatus === "checking" ? "Checking…" : "Apply"}
+            </button>
+          </div>
+        )}
+        {voucherError && (
+          <p className="mt-2 text-[12px] text-red-600">{voucherError}</p>
+        )}
       </div>
 
       <div className="mt-10 max-w-[720px] mx-auto">
@@ -105,9 +194,15 @@ export function StepConfirm({
 
       <div className="mt-8 flex flex-col items-center gap-3">
         <Button onClick={onConfirm} disabled={confirming}>
-          {confirming ? "Redirecting to payment…" : "Pay deposit & confirm"}
+          {confirming
+            ? "Confirming…"
+            : chargeable === 0
+            ? "Confirm booking"
+            : "Pay & confirm"}
         </Button>
-        <p className="text-[12px] text-teal/50">Secured by Stripe. 25% deposit, remainder on the day.</p>
+        {chargeable !== 0 && (
+          <p className="text-[12px] text-teal/50">Secured by Stripe.</p>
+        )}
       </div>
     </div>
   );
