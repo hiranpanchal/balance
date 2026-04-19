@@ -150,7 +150,7 @@ export default async function HomePage() {
           <div>
             <Eyebrow>Visit</Eyebrow>
             <h2 className="font-display text-[38px] md:text-[48px] leading-[1.1] mt-6 text-teal">
-              {studio.addressLines[0]}, Bristol.
+              {studio.addressLines[0]}
             </h2>
             <p className="mt-6 text-[15px] leading-[28px] max-w-[440px] text-teal/80">
               A quiet side street two minutes from the harbour. Tea is always on.
