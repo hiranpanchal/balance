@@ -7,7 +7,6 @@ import { StepTreatment } from "./StepTreatment";
 import { StepSchedule } from "./StepSchedule";
 import { StepDetails } from "./StepDetails";
 import { StepConfirm } from "./StepConfirm";
-import { StepSuccess } from "./StepSuccess";
 import { priceFor } from "@/lib/data";
 import type { BookingSelection, DurationMins, ServiceId } from "@/lib/types";
 
@@ -30,11 +29,6 @@ export function BookingWizard() {
   const params = useSearchParams();
 
   const [selection, setSelection] = useState<BookingSelection>({});
-  const [confirmed, setConfirmed] = useState<null | {
-    id: string;
-    sel: BookingSelection;
-    price: number;
-  }>(null);
   const [confirming, setConfirming] = useState(false);
   const [confirmError, setConfirmError] = useState("");
 
@@ -113,7 +107,7 @@ export function BookingWizard() {
     setConfirmError("");
 
     try {
-      const res = await fetch("/api/book/confirm", {
+      const res = await fetch("/api/book/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -137,16 +131,10 @@ export function BookingWizard() {
         throw new Error(json.error ?? "Something went wrong. Please try again.");
       }
 
-      const { ref } = await res.json();
-
-      try {
-        sessionStorage.removeItem(SS_KEY);
-      } catch {}
-
-      setConfirmed({ id: ref, sel: selection, price });
+      const { url } = await res.json();
+      window.location.href = url;
     } catch (err) {
       setConfirmError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
       setConfirming(false);
     }
   }, [selection]);
@@ -164,16 +152,6 @@ export function BookingWizard() {
       return 3;
     return 4;
   }, [selection]);
-
-  if (confirmed) {
-    return (
-      <StepSuccess
-        bookingId={confirmed.id}
-        selection={confirmed.sel}
-        price={confirmed.price}
-      />
-    );
-  }
 
   return (
     <div className="min-h-screen bg-cream">

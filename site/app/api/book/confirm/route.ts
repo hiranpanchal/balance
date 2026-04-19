@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { services } from "@/lib/data";
+import { getSiteContent } from "@/lib/content";
 
 const BookingSchema = z.object({
   treatment: z.string(),
@@ -61,10 +62,11 @@ export async function POST(request: Request) {
       const serviceName =
         services.find((s) => s.id === data.treatment)?.name ?? data.treatment;
 
-      const [{ Resend }, { createElement }, { BookingConfirmation }] = await Promise.all([
+      const [{ Resend }, { createElement }, { BookingConfirmation }, siteContent] = await Promise.all([
         import("resend"),
         import("react"),
         import("@/emails/BookingConfirmation"),
+        getSiteContent(),
       ]);
 
       const resend = new Resend(process.env.RESEND_API_KEY);
@@ -82,8 +84,8 @@ export async function POST(request: Request) {
           time: data.time,
           price: data.price,
           isFirstTime: data.firstTime,
-          studioAddress: "14 Linen Lane\nBristol BS1 4AA",
-          studioPhone: "+44 117 496 2250",
+          studioAddress: siteContent.studio.addressLines.join("\n"),
+          studioPhone: siteContent.studio.phone,
         }),
       });
 

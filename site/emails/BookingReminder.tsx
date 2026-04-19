@@ -13,31 +13,25 @@ import {
 } from "@react-email/components";
 import * as React from "react";
 
-interface BookingConfirmationProps {
-  ref: string;
+interface BookingReminderProps {
   firstName: string;
   serviceName: string;
   duration: number;
   date: string;
   time: string;
-  price: number;
-  isFirstTime: boolean;
   studioAddress: string;
   studioPhone: string;
 }
 
-export function BookingConfirmation({
-  ref,
+export function BookingReminder({
   firstName,
   serviceName,
   duration,
   date,
   time,
-  price,
-  isFirstTime,
   studioAddress,
   studioPhone,
-}: BookingConfirmationProps) {
+}: BookingReminderProps) {
   const formattedDate = new Date(date + "T00:00:00").toLocaleDateString("en-GB", {
     weekday: "long",
     day: "numeric",
@@ -48,12 +42,12 @@ export function BookingConfirmation({
   return (
     <Html>
       <Head />
-      <Preview>Your Balance &amp; Wellness session is confirmed — {formattedDate} at {time}</Preview>
+      <Preview>Tomorrow: your {serviceName} session at {time}</Preview>
       <Body style={main}>
         <Container style={container}>
           <Heading style={heading}>Balance &amp; Wellness</Heading>
           <Text style={intro}>
-            Hi {firstName}, your session is confirmed. We&rsquo;re looking forward to seeing you.
+            Hi {firstName}, just a friendly reminder that your session is tomorrow. We&rsquo;re looking forward to seeing you.
           </Text>
 
           <Section style={detailBox}>
@@ -69,29 +63,11 @@ export function BookingConfirmation({
               <Column style={label}>Date</Column>
               <Column style={value}>{formattedDate}</Column>
             </Row>
-            <Row style={{ marginBottom: "10px" }}>
+            <Row>
               <Column style={label}>Time</Column>
               <Column style={value}>{time}</Column>
             </Row>
-            <Row style={{ marginBottom: "10px" }}>
-              <Column style={label}>Price</Column>
-              <Column style={value}>£{price}</Column>
-            </Row>
-            <Row>
-              <Column style={label}>Ref</Column>
-              <Column style={value}>{ref}</Column>
-            </Row>
           </Section>
-
-          {isFirstTime && (
-            <Section style={callout}>
-              <Text style={calloutText}>
-                <strong>First visit?</strong> Please arrive ten minutes early — it gives us time to welcome you properly before the session starts.
-              </Text>
-            </Section>
-          )}
-
-          <Hr style={hr} />
 
           <Text style={text}>
             <strong>Where to find us</strong>
@@ -100,23 +76,20 @@ export function BookingConfirmation({
           </Text>
 
           <Text style={text}>
-            <strong>Need to change anything?</strong>
+            <strong>Need to cancel or reschedule?</strong>
             <br />
-            Call or message us at least 24 hours before: {studioPhone}. Changes
-            inside 24 hours are charged at 50%.
+            Please call or message us as soon as possible: {studioPhone}. Cancellations inside 24 hours are charged at 50%.
           </Text>
 
           <Hr style={hr} />
-          <Text style={footer}>
-            Balance &amp; Wellness
-          </Text>
+          <Text style={footer}>Balance &amp; Wellness</Text>
         </Container>
       </Body>
     </Html>
   );
 }
 
-export default BookingConfirmation;
+export default BookingReminder;
 
 const main = { backgroundColor: "#EAE2D2", fontFamily: "Georgia, serif" };
 const container = {
@@ -136,13 +109,6 @@ const detailBox = {
 };
 const label = { color: "#A09687", fontSize: "12px", letterSpacing: "0.1em", textTransform: "uppercase" as const, width: "120px" };
 const value = { color: "#3E4F56", fontSize: "14px" };
-const callout = {
-  backgroundColor: "#fff8ee",
-  borderLeft: "3px solid #B28B5D",
-  padding: "14px 18px",
-  marginBottom: "24px",
-};
-const calloutText = { color: "#3E4F56", fontSize: "14px", lineHeight: "22px", margin: 0 };
 const hr = { borderColor: "#B28B5D", margin: "24px 0" };
 const text = { color: "#3E4F56", fontSize: "14px", lineHeight: "22px", marginBottom: "16px" };
 const footer = { color: "#A09687", fontSize: "12px" };

@@ -56,22 +56,25 @@ model VerificationToken {
 // ─── Domain models ────────────────────────────────────────────────────────────
 
 model Booking {
-  id        String        @id @default(cuid())
-  ref       String        @unique
-  firstName String
-  lastName  String
-  email     String
-  phone     String
-  service   String
-  duration  Int
-  date      String
-  time      String
-  price     Int
-  status    BookingStatus @default(PENDING)
-  firstTime Boolean       @default(false)
-  notes     String        @default("")
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id               String        @id @default(cuid())
+  ref              String        @unique
+  firstName        String
+  lastName         String
+  email            String
+  phone            String
+  service          String
+  duration         Int
+  date             String
+  time             String
+  price            Int
+  status           BookingStatus @default(PENDING)
+  firstTime        Boolean       @default(false)
+  notes            String        @default("")
+  stripeSessionId  String?       @unique
+  depositAmount    Int           @default(0)
+  depositPaid      Boolean       @default(false)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 }
 
 enum BookingStatus {

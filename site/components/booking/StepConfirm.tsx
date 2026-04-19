@@ -42,8 +42,8 @@ export function StepConfirm({
           Almost there. Please confirm.
         </h2>
         <p className="mt-6 text-[15px] leading-[28px] text-teal/80">
-          Review your details below. Nothing is charged until the day of your
-          session.
+          Review your details below. A 25% deposit is taken now to secure your
+          session — the remainder is payable on the day.
         </p>
       </div>
 
@@ -101,10 +101,11 @@ export function StepConfirm({
         </div>
       )}
 
-      <div className="mt-8 flex justify-center">
+      <div className="mt-8 flex flex-col items-center gap-3">
         <Button onClick={onConfirm} disabled={confirming}>
-          {confirming ? "Confirming…" : "Confirm booking"}
+          {confirming ? "Redirecting to payment…" : "Pay deposit & confirm"}
         </Button>
+        <p className="text-[12px] text-teal/50">Secured by Stripe. 25% deposit, remainder on the day.</p>
       </div>
     </div>
   );

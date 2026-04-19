@@ -43,6 +43,7 @@ const sections = [
     note: "Paste your Google Search Console verification code here to verify ownership of the site.",
     fields: [
       { key: "seo.googleVerification", label: "Google Search Console verification code", type: "input", placeholder: "e.g. abc123XYZ…" },
+      { key: "seo.googleReviewsUrl", label: "Google Reviews link", type: "input", placeholder: "https://g.page/r/…/review" },
     ],
   },
 ];

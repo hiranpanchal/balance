@@ -35,8 +35,26 @@ export default function ServiceDetailPage({
 
   const related = services.filter((s) => s.id !== service.id).slice(0, 2);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: service.name,
+    description: service.lead,
+    provider: { "@type": "LocalBusiness", name: "Balance and Wellness" },
+    offers: service.durations.map((d) => ({
+      "@type": "Offer",
+      priceCurrency: "GBP",
+      price: d.price,
+      name: `${d.mins} min`,
+    })),
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <section className="pt-20 md:pt-28 px-6 md:px-12">
         <div className="max-w-[1200px] mx-auto grid md:grid-cols-2 gap-12 md:gap-20 items-center">
           <div>
