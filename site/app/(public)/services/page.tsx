@@ -4,8 +4,10 @@ import { Eyebrow } from "@/components/site/Eyebrow";
 import { GoldRule } from "@/components/site/GoldRule";
 import { Button } from "@/components/site/Button";
 import { ImgPlaceholder } from "@/components/site/ImgPlaceholder";
-import { services } from "@/lib/data";
 import { getPageDescription } from "@/lib/content";
+import { getServices } from "@/lib/getServices";
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -17,7 +19,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const services = await getServices();
   return (
     <>
       <section className="pt-24 md:pt-32 pb-8 px-6 md:px-12">

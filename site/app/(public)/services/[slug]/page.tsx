@@ -5,19 +5,17 @@ import { Eyebrow } from "@/components/site/Eyebrow";
 import { GoldRule } from "@/components/site/GoldRule";
 import { Button } from "@/components/site/Button";
 import { ImgPlaceholder } from "@/components/site/ImgPlaceholder";
-import { services, therapist } from "@/lib/data";
-import type { Service } from "@/lib/types";
+import { therapist } from "@/lib/data";
+import { getServices, getService } from "@/lib/getServices";
 
-export function generateStaticParams() {
-  return services.map((s) => ({ slug: s.id }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const service = services.find((s) => s.id === params.slug);
+  const service = await getService(params.slug);
   if (!service) return {};
   return {
     title: service.name,
@@ -25,15 +23,18 @@ export async function generateMetadata({
   };
 }
 
-export default function ServiceDetailPage({
+export default async function ServiceDetailPage({
   params,
 }: {
   params: { slug: string };
 }) {
-  const service = services.find((s): s is Service => s.id === params.slug);
+  const [service, allServices] = await Promise.all([
+    getService(params.slug),
+    getServices(),
+  ]);
   if (!service) notFound();
 
-  const related = services.filter((s) => s.id !== service.id).slice(0, 2);
+  const related = allServices.filter((s) => s.id !== service.id).slice(0, 2);
 
   const jsonLd = {
     "@context": "https://schema.org",

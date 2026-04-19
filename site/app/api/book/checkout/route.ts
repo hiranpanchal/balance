@@ -5,6 +5,7 @@ import { z } from "zod";
 import Stripe from "stripe";
 import { db } from "@/lib/db";
 import { services, priceFor } from "@/lib/data";
+import { priceForFromDb } from "@/lib/getServices";
 
 const CheckoutSchema = z.object({
   treatment: z.string(),
@@ -39,7 +40,9 @@ export async function POST(request: Request) {
     const body = await request.json();
     const data = CheckoutSchema.parse(body);
 
-    const calculatedPrice = priceFor(data.treatment, data.duration);
+    const calculatedPrice =
+      (await priceForFromDb(data.treatment, data.duration)) ??
+      priceFor(data.treatment, data.duration);
     if (!calculatedPrice || calculatedPrice !== data.price) {
       return NextResponse.json({ error: "Invalid price" }, { status: 422 });
     }

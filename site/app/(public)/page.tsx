@@ -7,8 +7,9 @@ import { Button } from "@/components/site/Button";
 import { ServiceCard } from "@/components/site/ServiceCard";
 import { JournalCard } from "@/components/site/JournalCard";
 import { ImgPlaceholder } from "@/components/site/ImgPlaceholder";
-import { services, journalPosts, featuredServiceIds } from "@/lib/data";
+import { journalPosts, featuredServiceIds } from "@/lib/data";
 import { getSiteContent } from "@/lib/content";
+import { getServices } from "@/lib/getServices";
 
 export const dynamic = "force-dynamic";
 
@@ -38,13 +39,12 @@ const approach = [
   },
 ];
 
-const featuredServices = featuredServiceIds
-  .map((id) => services.find((s) => s.id === id))
-  .filter((s): s is (typeof services)[number] => Boolean(s));
-
 export default async function HomePage() {
-  const content = await getSiteContent();
+  const [content, allServices] = await Promise.all([getSiteContent(), getServices()]);
   const { studio } = content;
+  const featuredServices = featuredServiceIds
+    .map((id) => allServices.find((s) => s.id === id))
+    .filter(Boolean) as (typeof allServices)[number][];
   const latestPosts = journalPosts.slice(0, 2);
 
   return (
