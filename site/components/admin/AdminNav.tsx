@@ -37,7 +37,7 @@ export function AdminNav() {
   return (
     <nav className="w-56 bg-[#3E4F56] flex flex-col shrink-0 min-h-screen">
       <div className="px-6 py-6 border-b border-white/10">
-        <img src="/logo-dark.svg" alt="Balance and Wellness" className="h-10 w-auto" />
+        <img src="/logo-dark.svg" alt="Balance and Wellness" className="w-full h-auto" />
         <div className="text-white/45 text-[11px] tracking-[0.15em] uppercase mt-3">
           Admin
         </div>
