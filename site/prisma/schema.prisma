@@ -147,6 +147,16 @@ model Image {
   createdAt DateTime @default(now())
 }
 
+model Review {
+  id           String   @id @default(cuid())
+  name         String
+  company      String   @default("")
+  body         String   @db.Text
+  rating       Int      @default(5)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+}
+
 model Client {
   id         String      @id @default(cuid())
   firstName  String

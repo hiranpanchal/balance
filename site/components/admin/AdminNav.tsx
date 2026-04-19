@@ -7,11 +7,11 @@ import {
   CalendarDays,
   Layers,
   Calendar,
-  FileText,
   Image as ImageIcon,
   BookOpen,
   LogOut,
   Settings,
+  Star,
   Users,
 } from "lucide-react";
 
@@ -21,6 +21,7 @@ const navItems = [
   { href: "/admin/calendar", label: "Calendar", icon: Calendar },
   { href: "/admin/services", label: "Services", icon: Layers },
   { href: "/admin/availability", label: "Availability", icon: Calendar },
+  { href: "/admin/reviews", label: "Reviews", icon: Star },
   { href: "/admin/content", label: "Content", icon: Settings },
   { href: "/admin/journal", label: "Journal", icon: BookOpen },
   { href: "/admin/images", label: "Images", icon: ImageIcon },

@@ -10,6 +10,7 @@ import { ImgPlaceholder } from "@/components/site/ImgPlaceholder";
 import { journalPosts, featuredServiceIds } from "@/lib/data";
 import { getSiteContent } from "@/lib/content";
 import { getServices } from "@/lib/getServices";
+import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +41,11 @@ const approach = [
 ];
 
 export default async function HomePage() {
-  const [content, allServices] = await Promise.all([getSiteContent(), getServices()]);
+  const [content, allServices, latestReviews] = await Promise.all([
+    getSiteContent(),
+    getServices(),
+    db.review.findMany({ orderBy: [{ displayOrder: "asc" }, { createdAt: "desc" }], take: 4 }),
+  ]);
   const { studio } = content;
   const featuredServices = featuredServiceIds
     .map((id) => allServices.find((s) => s.id === id))
@@ -110,18 +115,42 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Testimonial */}
-      <section className="py-28 md:py-32 px-6 md:px-12">
-        <div className="max-w-[820px] mx-auto text-center">
-          <GoldRule width="w-10" />
-          <p className="font-display italic text-[30px] md:text-[44px] leading-[1.25] mt-10 text-teal">
-            &ldquo;I came in rigid. I left feeling like myself again.&rdquo;
-          </p>
-          <div className="mt-8 text-[11px] tracking-[0.28em] uppercase text-gold">
-            — Anna R., guest since 2024
+      {/* Reviews */}
+      {latestReviews.length > 0 && (
+        <section className="py-24 md:py-28 px-6 md:px-12">
+          <div className="max-w-[1200px] mx-auto">
+            <div className="text-center mb-14">
+              <Eyebrow>Reviews</Eyebrow>
+              <h2 className="font-display text-[32px] md:text-[40px] leading-[1.15] mt-4 text-teal">
+                What guests say.
+              </h2>
+            </div>
+            <div className="grid md:grid-cols-2 gap-6">
+              {latestReviews.map((r) => (
+                <article key={r.id} className="bg-cream-light rounded-lg p-8 flex flex-col gap-4">
+                  <div className="flex gap-1" aria-label={`${r.rating} out of 5 stars`}>
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <span key={n} aria-hidden className="text-[20px] leading-none" style={{ color: n <= r.rating ? "#B28B5D" : "#D1C4B0" }}>★</span>
+                    ))}
+                  </div>
+                  <p className="font-display italic text-[18px] md:text-[20px] leading-[1.4] text-teal flex-1">
+                    &ldquo;{r.body}&rdquo;
+                  </p>
+                  <div className="pt-4 border-t border-teal/10">
+                    <div className="text-[13px] font-medium text-teal">{r.name}</div>
+                    {r.company && <div className="text-[12px] text-teal/55 mt-0.5">{r.company}</div>}
+                  </div>
+                </article>
+              ))}
+            </div>
+            <div className="mt-10 text-center">
+              <Link href="/reviews" className="text-[12px] tracking-[0.22em] uppercase text-teal border-b border-gold pb-1">
+                Read all reviews →
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Journal preview */}
       <section className="py-24 px-6 md:px-12 bg-cream-light">
