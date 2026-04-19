@@ -34,6 +34,17 @@ export async function POST(request: Request) {
       data: { status: "CONFIRMED", depositPaid: true },
     });
 
+    // Auto-upgrade to REGULAR after 5 confirmed/completed bookings
+    const client = await db.client.findUnique({ where: { email: booking.email } });
+    if (client && client.grade === "NEW") {
+      const confirmedCount = await db.booking.count({
+        where: { email: booking.email, status: { in: ["CONFIRMED", "COMPLETED"] } },
+      });
+      if (confirmedCount >= 5) {
+        await db.client.update({ where: { id: client.id }, data: { grade: "REGULAR" } });
+      }
+    }
+
     // Send confirmation email (non-blocking)
     try {
       const [{ Resend }, { BookingConfirmation }, siteContent, svc] = await Promise.all([

@@ -9,6 +9,7 @@ const UpdateSchema = z.object({
   lastName: z.string().optional(),
   phone: z.string().optional(),
   notes: z.string().optional(),
+  grade: z.enum(["NEW", "REGULAR"]).optional(),
 });
 
 export async function GET(_req: Request, { params }: { params: { id: string } }) {

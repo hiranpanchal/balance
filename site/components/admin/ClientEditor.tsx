@@ -7,11 +7,13 @@ interface Props {
   clientId: string;
   initialNotes: string;
   initialPhone: string;
+  initialGrade: "NEW" | "REGULAR";
 }
 
-export function ClientEditor({ clientId, initialNotes, initialPhone }: Props) {
+export function ClientEditor({ clientId, initialNotes, initialPhone, initialGrade }: Props) {
   const [notes, setNotes] = useState(initialNotes);
   const [phone, setPhone] = useState(initialPhone);
+  const [grade, setGrade] = useState<"NEW" | "REGULAR">(initialGrade);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const router = useRouter();
@@ -37,8 +39,36 @@ export function ClientEditor({ clientId, initialNotes, initialPhone }: Props) {
     saveTimer.current = setTimeout(() => save({ notes: value }), 1000);
   }
 
+  async function saveGrade(value: "NEW" | "REGULAR") {
+    setGrade(value);
+    await fetch(`/api/admin/clients/${clientId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ grade: value }),
+    });
+    router.refresh();
+  }
+
   return (
     <div className="space-y-6">
+      {/* Grade */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <label className="block text-[11px] tracking-[0.1em] uppercase text-[#A09687] mb-2">
+          Customer type
+        </label>
+        <select
+          value={grade}
+          onChange={(e) => saveGrade(e.target.value as "NEW" | "REGULAR")}
+          className="w-full border border-[#3E4F56]/20 rounded px-3 py-2.5 text-[13px] text-[#3E4F56] bg-[#F5F0E6] focus:outline-none focus:border-[#B28B5D]"
+        >
+          <option value="NEW">New customer — full payment required</option>
+          <option value="REGULAR">Regular customer — 50% deposit</option>
+        </select>
+        <p className="mt-2 text-[11px] text-[#A09687]">
+          Auto-upgrades to Regular after 5 confirmed bookings. Can be set manually here.
+        </p>
+      </div>
+
       {/* Phone */}
       <div className="bg-white rounded-lg shadow-sm p-6">
         <label className="block text-[11px] tracking-[0.1em] uppercase text-[#A09687] mb-2">

@@ -27,9 +27,9 @@ function generateRef(): string {
   return `BK-${Math.floor(1000 + Math.random() * 9000)}`;
 }
 
-function depositAmount(totalPence: number): number {
-  // 25% deposit, minimum £10, always a whole number of pence
-  return Math.max(Math.round(totalPence * 0.25), 1000);
+function depositAmount(totalPence: number, isRegular: boolean): number {
+  if (isRegular) return Math.round(totalPence * 0.5);
+  return totalPence; // new customers pay full price upfront
 }
 
 export async function POST(request: Request) {
@@ -49,9 +49,13 @@ export async function POST(request: Request) {
     }
 
     const ref = generateRef();
-    const svc = await getService(data.treatment);
+    const [svc, existingClient] = await Promise.all([
+      getService(data.treatment),
+      db.client.findUnique({ where: { email: data.email }, select: { grade: true } }),
+    ]);
+    const isRegular = existingClient?.grade === "REGULAR";
     const serviceName = svc?.name ?? data.treatment;
-    const depositPence = depositAmount(data.price * 100);
+    const depositPence = depositAmount(data.price * 100, isRegular);
     const origin = request.headers.get("origin") ?? "https://balanceandwellness.com";
 
     // Create the booking as PENDING — webhook will confirm it after payment
@@ -89,8 +93,10 @@ export async function POST(request: Request) {
             currency: "gbp",
             unit_amount: depositPence,
             product_data: {
-              name: `${serviceName} — deposit`,
-              description: `${data.duration} min session on ${data.date} at ${data.time}. Remainder (£${data.price - depositPence / 100}) payable on the day.`,
+              name: isRegular ? `${serviceName} — deposit` : `${serviceName} — full payment`,
+              description: isRegular
+                ? `${data.duration} min session on ${data.date} at ${data.time}. Remainder (£${data.price - depositPence / 100}) payable on the day.`
+                : `${data.duration} min session on ${data.date} at ${data.time}. Full payment — nothing more to pay on the day.`,
             },
           },
           quantity: 1,

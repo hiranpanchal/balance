@@ -67,7 +67,7 @@ export default async function ClientsPage() {
         <table className="w-full text-[13px]">
           <thead>
             <tr className="border-b border-[#EAE2D2]">
-              {["Client", "Phone", "Bookings", "Total spent", "Last visit", ""].map((h) => (
+              {["Client", "Type", "Phone", "Bookings", "Total spent", "Last visit", ""].map((h) => (
                 <th
                   key={h}
                   className="text-left text-[11px] tracking-[0.1em] uppercase text-[#A09687] px-5 py-4 font-normal"
@@ -80,7 +80,7 @@ export default async function ClientsPage() {
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-5 py-12 text-center text-[#A09687]">
+                <td colSpan={7} className="px-5 py-12 text-center text-[#A09687]">
                   No clients yet. They appear automatically when someone books.
                 </td>
               </tr>
@@ -92,6 +92,15 @@ export default async function ClientsPage() {
                     {c.firstName} {c.lastName}
                   </div>
                   <div className="text-[11px] text-[#A09687]">{c.email}</div>
+                </td>
+                <td className="px-5 py-4">
+                  <span className={`text-[10px] tracking-[0.12em] uppercase px-2.5 py-1 rounded-full ${
+                    c.grade === "REGULAR"
+                      ? "bg-[#B28B5D]/15 text-[#B28B5D]"
+                      : "bg-[#3E4F56]/10 text-[#3E4F56]"
+                  }`}>
+                    {c.grade === "REGULAR" ? "Regular" : "New"}
+                  </span>
                 </td>
                 <td className="px-5 py-4 text-[#3E4F56]">{c.phone || "—"}</td>
                 <td className="px-5 py-4 text-[#3E4F56]">{c.totalBookings}</td>

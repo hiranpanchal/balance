@@ -49,9 +49,18 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
         <div className="space-y-6">
           {/* Header card */}
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <h1 className="font-serif text-[24px] text-[#3E4F56] font-normal">
-              {client.firstName} {client.lastName}
-            </h1>
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="font-serif text-[24px] text-[#3E4F56] font-normal">
+                {client.firstName} {client.lastName}
+              </h1>
+              <span className={`text-[10px] tracking-[0.12em] uppercase px-2.5 py-1 rounded-full ${
+                client.grade === "REGULAR"
+                  ? "bg-[#B28B5D]/15 text-[#B28B5D]"
+                  : "bg-[#3E4F56]/10 text-[#3E4F56]"
+              }`}>
+                {client.grade === "REGULAR" ? "Regular" : "New"}
+              </span>
+            </div>
             <p className="text-[#A09687] text-[13px] mt-1">{client.email}</p>
 
             <dl className="grid grid-cols-3 gap-6 mt-6 pt-6 border-t border-[#F5F0E6]">
@@ -172,6 +181,7 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
             clientId={client.id}
             initialNotes={client.notes}
             initialPhone={client.phone}
+            initialGrade={client.grade}
           />
           <IntakeSection
             clientId={client.id}

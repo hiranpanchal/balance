@@ -158,6 +158,11 @@ model Review {
   createdAt    DateTime @default(now())
 }
 
+enum ClientGrade {
+  NEW
+  REGULAR
+}
+
 model Client {
   id         String      @id @default(cuid())
   firstName  String
@@ -165,6 +170,7 @@ model Client {
   email      String      @unique
   phone      String      @default("")
   notes      String      @default("") @db.Text
+  grade      ClientGrade @default(NEW)
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
   intakeForm IntakeForm?
