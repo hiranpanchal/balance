@@ -145,12 +145,50 @@ model Image {
 }
 
 model Client {
-  id        String   @id @default(cuid())
-  firstName String
-  lastName  String
-  email     String   @unique
-  phone     String   @default("")
-  notes     String   @default("") @db.Text
+  id         String      @id @default(cuid())
+  firstName  String
+  lastName   String
+  email      String      @unique
+  phone      String      @default("")
+  notes      String      @default("") @db.Text
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  intakeForm IntakeForm?
+}
+
+model IntakeForm {
+  id        String    @id @default(cuid())
+  clientId  String    @unique
+  client    Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  token     String    @unique @default(cuid())
+  completedAt DateTime?
+
+  // Personal
+  dateOfBirth    String @default("")
+  occupation     String @default("")
+  address        String @default("") @db.Text
+  emergencyName  String @default("")
+  emergencyPhone String @default("")
+
+  // Health history
+  conditions   Json    @default("[]")
+  medications  String  @default("") @db.Text
+  allergies    String  @default("") @db.Text
+  recentInjury String  @default("") @db.Text
+  isPregnant   Boolean @default(false)
+
+  // Areas & preferences
+  painAreas          Json    @default("[]")
+  painNotes          String  @default("") @db.Text
+  previousMassage    Boolean @default(false)
+  massageFrequency   String  @default("")
+  pressurePreference String  @default("medium")
+  areasToAvoid       String  @default("") @db.Text
+  goals              String  @default("") @db.Text
+
+  // Consent
+  consentName String @default("")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

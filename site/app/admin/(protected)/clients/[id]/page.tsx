@@ -6,12 +6,16 @@ import { services } from "@/lib/data";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { ClientEditor } from "@/components/admin/ClientEditor";
 import { ManualBookingForm } from "@/components/admin/ManualBookingForm";
+import { IntakeSection } from "@/components/admin/IntakeSection";
 
 export const metadata: Metadata = { title: "Client" };
 export const dynamic = "force-dynamic";
 
 export default async function ClientDetailPage({ params }: { params: { id: string } }) {
-  const client = await db.client.findUnique({ where: { id: params.id } });
+  const client = await db.client.findUnique({
+    where: { id: params.id },
+    include: { intakeForm: true },
+  });
   if (!client) notFound();
 
   const today = new Date().toISOString().split("T")[0];
@@ -161,6 +165,10 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
             clientId={client.id}
             initialNotes={client.notes}
             initialPhone={client.phone}
+          />
+          <IntakeSection
+            clientId={client.id}
+            intake={JSON.parse(JSON.stringify(client.intakeForm))}
           />
           <ManualBookingForm
             client={{
