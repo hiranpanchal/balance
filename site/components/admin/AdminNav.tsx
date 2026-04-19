@@ -18,6 +18,7 @@ import {
 const navItems = [
   { href: "/admin/clients", label: "Clients", icon: Users },
   { href: "/admin/bookings", label: "Bookings", icon: CalendarDays },
+  { href: "/admin/calendar", label: "Calendar", icon: Calendar },
   { href: "/admin/services", label: "Services", icon: Layers },
   { href: "/admin/availability", label: "Availability", icon: Calendar },
   { href: "/admin/content", label: "Content", icon: Settings },

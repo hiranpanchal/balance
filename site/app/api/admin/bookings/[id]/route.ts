@@ -8,6 +8,7 @@ const UpdateSchema = z.object({
   status: z.enum(["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED", "NO_SHOW"]).optional(),
   date: z.string().optional(),
   time: z.string().optional(),
+  duration: z.number().optional(),
   notes: z.string().optional(),
 });
 
