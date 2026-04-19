@@ -60,35 +60,39 @@ export function ManualBookingForm({ client, services }: Props) {
     setSaving(true);
     setError("");
 
-    const res = await fetch("/api/admin/bookings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        firstName: client.firstName,
-        lastName: client.lastName,
-        email: client.email,
-        phone: client.phone,
-        service: serviceId,
-        duration,
-        date,
-        time,
-        price,
-        notes,
-        status,
-      }),
-    });
+    try {
+      const res = await fetch("/api/admin/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: client.firstName,
+          lastName: client.lastName,
+          email: client.email,
+          phone: client.phone,
+          service: serviceId,
+          duration,
+          date,
+          time,
+          price,
+          notes,
+          status,
+        }),
+      });
 
-    if (!res.ok) {
-      setError("Failed to create booking. Please try again.");
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        setError(json.error ?? "Failed to create booking. Please try again.");
+        return;
+      }
+
+      setDate("");
+      setNotes("");
+      router.refresh();
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
       setSaving(false);
-      return;
     }
-
-    router.refresh();
-    setSaving(false);
-    setDate("");
-    setNotes("");
-    setError("");
   }
 
   return (

@@ -53,26 +53,29 @@ export async function POST(request: Request) {
   const body = await request.json();
   const data = CreateSchema.parse(body);
 
-  const num = Math.floor(1000 + Math.random() * 9000);
-  const ref = `BK-${num}`;
+  const ref = `BK-${Date.now().toString(36).toUpperCase()}`;
 
-  const booking = await db.booking.create({
-    data: {
-      ref,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      email: data.email,
-      phone: data.phone,
-      service: data.service,
-      duration: data.duration,
-      date: data.date,
-      time: data.time,
-      price: data.price,
-      notes: data.notes ?? "",
-      firstTime: data.firstTime ?? false,
-      status: data.status ?? "CONFIRMED",
-    },
-  });
-
-  return NextResponse.json(booking, { status: 201 });
+  try {
+    const booking = await db.booking.create({
+      data: {
+        ref,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        phone: data.phone,
+        service: data.service,
+        duration: data.duration,
+        date: data.date,
+        time: data.time,
+        price: data.price,
+        notes: data.notes ?? "",
+        firstTime: data.firstTime ?? false,
+        status: data.status ?? "CONFIRMED",
+      },
+    });
+    return NextResponse.json(booking, { status: 201 });
+  } catch (err) {
+    console.error("Failed to create booking:", err);
+    return NextResponse.json({ error: "Failed to create booking." }, { status: 500 });
+  }
 }
