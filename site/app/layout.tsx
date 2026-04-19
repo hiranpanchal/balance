@@ -32,14 +32,22 @@ export const metadata: Metadata = {
     template: "%s · Balance and Wellness — massage & bodywork",
   },
   description:
-    "Boutique massage and bodywork in Bristol by clinical aromatherapist Mukti Panchal. Unhurried, one-guest-at-a-time sessions.",
+    "Boutique massage and bodywork by clinical aromatherapist Mukti Panchal. Unhurried, one-guest-at-a-time sessions in Lostock Hall.",
   openGraph: {
     type: "website",
     siteName: "Balance and Wellness",
-    images: ["/og.png"],
+    images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Balance and Wellness — massage & bodywork",
+    description:
+      "Boutique massage and bodywork by clinical aromatherapist Mukti Panchal. Unhurried, one-guest-at-a-time sessions in Lostock Hall.",
+    images: ["/opengraph-image"],
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: "/logo-light.svg",
+    apple: "/Balance-2025.-logo.png",
   },
 };
 

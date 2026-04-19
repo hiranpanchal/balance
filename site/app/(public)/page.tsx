@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Hero } from "@/components/site/Hero";
 import { Eyebrow } from "@/components/site/Eyebrow";
@@ -10,6 +11,12 @@ import { services, journalPosts, featuredServiceIds } from "@/lib/data";
 import { getSiteContent } from "@/lib/content";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Balance and Wellness — boutique massage & bodywork",
+  description:
+    "Boutique massage and bodywork by clinical aromatherapist Mukti Panchal. Seven treatments, one guest at a time, in Lostock Hall.",
+};
 
 const approach = [
   {

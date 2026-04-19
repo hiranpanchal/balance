@@ -8,7 +8,7 @@ import { therapist, values } from "@/lib/data";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Meet Mukti Panchal — fully qualified clinical aromatherapist and massage therapist. Boutique Bristol studio, one guest at a time.",
+    "Meet Mukti Panchal — fully qualified clinical aromatherapist and massage therapist. Boutique studio in Lostock Hall, one guest at a time.",
 };
 
 const GALLERY = [
