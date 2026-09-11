@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import { portalUpsertPost } from "@/lib/portal";
 
 const CreateSchema = z.object({
   slug: z.string().min(1),
@@ -37,6 +38,25 @@ export async function POST(request: Request) {
       publishedAt: data.publishedAt ? new Date(data.publishedAt) : new Date(),
     },
   });
+
+  try {
+    const portalId = await portalUpsertPost({
+      title: post.title,
+      slug: post.slug,
+      excerpt: post.excerpt || undefined,
+      body: post.body || undefined,
+      category: post.tag || undefined,
+      coverImage: post.image || undefined,
+      publishedAt: post.publishedAt.toISOString(),
+      status: post.published ? "published" : "draft",
+    });
+    await db.journalPost.update({
+      where: { slug: post.slug },
+      data: { portalPostId: portalId },
+    });
+  } catch (err) {
+    console.error("Portal sync failed (create):", err);
+  }
 
   return NextResponse.json(post, { status: 201 });
 }

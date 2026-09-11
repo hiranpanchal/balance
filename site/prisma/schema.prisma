@@ -141,17 +141,18 @@ model ServiceDuration {
 }
 
 model JournalPost {
-  slug        String   @id
-  title       String
-  excerpt     String   @db.Text
-  body        String   @db.Text
-  tag         String   @default("")
-  readingTime Int      @default(3)
-  image       String   @default("")
-  published   Boolean  @default(false)
-  publishedAt DateTime @default(now())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  slug         String   @id
+  title        String
+  excerpt      String   @db.Text
+  body         String   @db.Text
+  tag          String   @default("")
+  readingTime  Int      @default(3)
+  image        String   @default("")
+  published    Boolean  @default(false)
+  publishedAt  DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  portalPostId Int?
 }
 
 model BlockedDate {

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import { portalUpsertPost, portalDeletePost } from "@/lib/portal";
 
 const UpdateSchema = z.object({
   title: z.string().optional(),
@@ -46,6 +47,27 @@ export async function PATCH(
     },
   });
 
+  try {
+    const portalId = await portalUpsertPost({
+      title: post.title,
+      slug: post.slug,
+      excerpt: post.excerpt || undefined,
+      body: post.body || undefined,
+      category: post.tag || undefined,
+      coverImage: post.image || undefined,
+      publishedAt: post.publishedAt.toISOString(),
+      status: post.published ? "published" : "draft",
+    });
+    if (!post.portalPostId) {
+      await db.journalPost.update({
+        where: { slug: post.slug },
+        data: { portalPostId: portalId },
+      });
+    }
+  } catch (err) {
+    console.error("Portal sync failed (update):", err);
+  }
+
   return NextResponse.json(post);
 }
 
@@ -56,6 +78,17 @@ export async function DELETE(
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const post = await db.journalPost.findUnique({ where: { slug: params.slug } });
+
   await db.journalPost.delete({ where: { slug: params.slug } });
+
+  if (post?.portalPostId) {
+    try {
+      await portalDeletePost(post.portalPostId);
+    } catch (err) {
+      console.error("Portal sync failed (delete):", err);
+    }
+  }
+
   return new NextResponse(null, { status: 204 });
 }

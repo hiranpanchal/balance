@@ -174,6 +174,7 @@ async function main() {
       image: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1600&q=80",
       published: true,
       publishedAt: new Date("2026-03-14"),
+      portalPostId: 99,
       body: `We think of stillness as rest — the absence of movement, a default the body returns to when nothing else is being asked of it. It isn't. For most of my guests, stillness is the hardest part of the session.
 
 In a world that rewards restlessness, sitting with a quiet body can feel unnervingly loud. The mind expects to be fed. The shoulders, having learned to hold, don't trust that they are allowed to let go.
@@ -189,6 +190,7 @@ Treat stillness as a skill, not a state. Ten minutes a day of nothing — no pho
       image: "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=1600&q=80",
       published: true,
       publishedAt: new Date("2026-03-02"),
+      portalPostId: 95,
       body: `Sleep isn't something you reach for — it's something you allow. The more you reach, the more it moves. A ritual works because it replaces reaching with routine.
 
 Start with warmth. A cup of something hot; not caffeinated. Dim the lights a full hour before bed — most evenings I run my lamps at half strength from nine.
@@ -204,6 +206,7 @@ Three slow breaths at the edge of the bed. Four counts in, six counts out. Feet 
       image: "https://images.unsplash.com/photo-1600334129128-685c5582fd35?auto=format&fit=crop&w=1600&q=80",
       published: true,
       publishedAt: new Date("2026-02-18"),
+      portalPostId: 97,
       body: `The most common question I'm asked is: which one? The honest answer is that either works for most people most of the time. But there are a few signals worth paying attention to.
 
 If you are tired — genuinely, in-your-bones tired — book a Holistic or a Balance session. Deeper work asks something of you that a depleted body isn't in a position to give. A long, rhythmic session will do more than a more targeted one ever could.
@@ -219,6 +222,7 @@ If you are carrying a specific, stubborn tension — the same shoulder for the l
       image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1600&q=80",
       published: true,
       publishedAt: new Date("2026-02-01"),
+      portalPostId: 98,
       body: `A sixty-minute massage is a good massage. A ninety-minute massage is a different thing altogether.
 
 The first twenty minutes of any session is a warming — muscle needs time to register that it is being cared for rather than asked for something. In a sixty, that warming takes up a third of the time.
