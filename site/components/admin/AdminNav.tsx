@@ -55,8 +55,8 @@ export function AdminNav() {
   return (
     <nav className="w-56 bg-[#2E3C42] flex flex-col shrink-0 min-h-screen">
       {/* Logo */}
-      <div className="px-5 pt-7 pb-6 border-b border-white/10">
-        <img src="/logo-dark.svg" alt="Balance and Wellness" className="w-full h-auto" />
+      <div className="px-5 pt-6 pb-5 border-b border-white/10">
+        <img src="/logo-dark.svg" alt="Balance and Wellness" className="h-11 w-auto max-w-full" />
       </div>
 
       {/* Nav groups */}
