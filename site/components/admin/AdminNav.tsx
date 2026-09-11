@@ -7,13 +7,11 @@ import {
   CalendarDays,
   Layers,
   Calendar,
-  Image as ImageIcon,
   BookOpen,
   LogOut,
   Settings,
   Star,
   Users,
-  FileText,
   Gift,
   LayoutDashboard,
   Clock,
@@ -32,9 +30,7 @@ const navItems = [
   { href: "/admin/waitlist", label: "Waitlist", icon: Clock },
   { href: "/admin/reviews", label: "Reviews", icon: Star },
   { href: "/admin/content", label: "Content", icon: Settings },
-  { href: "/admin/about", label: "About", icon: FileText },
   { href: "/admin/journal", label: "Journal", icon: BookOpen },
-  { href: "/admin/images", label: "Images", icon: ImageIcon },
 ];
 
 export function AdminNav() {
